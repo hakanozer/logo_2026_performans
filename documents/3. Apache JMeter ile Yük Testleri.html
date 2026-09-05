@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modül 3 - Apache JMeter ile Yük Testleri</title>
+  <style>
+    :root{--bg:#f5f8fc;--card:#fff;--ink:#1f2937;--muted:#607086;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+    .wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+    h1,h2{color:var(--brand)}h1{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 8px}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}
+    .box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+    .copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+    .copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+    .table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{background:#eef2f7}
+    .nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+    @media(max-width:800px){.toc ul{column-count:1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card"><h1>Modül 3: Apache JMeter ile Yük Testleri</h1><p>Bu modülde JMeter ile kod yazmadan test planı oluşturma, API senaryolarını taşıma ve gerçek kullanıcı davranışını modelleme adımlarını öğrenirsiniz.</p></section>
+
+  <nav class="card toc">
+    <h2>İçindekiler / Bölüm Haritası</h2>
+    <ul>
+      <li><a href="#yapi">JMeter Bileşenleri ve Çalışma Mantığı</a></li>
+      <li><a href="#basit-plan">Basit Test Planı Oluşturma</a></li>
+      <li><a href="#api">Web ve API Testleri (GET/POST/PUT/DELETE)</a></li>
+      <li><a href="#postman">Postman ile API Hazırlama ve JMeter'a Aktarma</a></li>
+      <li><a href="#ileri">CSV Parametrizasyon, Correlation, Session Yönetimi</a></li>
+      <li><a href="#birlesik">Mobil/Web/API Tek Çatı Yaklaşımı</a></li>
+      <li><a href="#ozet">Modül Özeti</a></li>
+    </ul>
+  </nav>
+
+  <section class="card" id="yapi">
+    <h2>1) JMeter Nedir? Bileşenler Ne İşe Yarar?</h2>
+    <ul>
+      <li><strong>Test Plan:</strong> Tüm test kurgusunun ana dosyası.</li>
+      <li><strong>Thread Group:</strong> Sanal kullanıcı sayısı, ramp-up, loop ayarları.</li>
+      <li><strong>Sampler:</strong> İsteğin kendisi (HTTP Request gibi).</li>
+      <li><strong>Listener:</strong> Sonuçların görüntülendiği rapor bileşenleri.</li>
+      <li><strong>Assertion:</strong> Beklenen yanıtı doğrulama kuralları.</li>
+      <li><strong>Timer:</strong> Kullanıcı bekleme davranışını modelleme.</li>
+    </ul>
+    <div class="box"><strong>Neden Önemli?</strong><br>Bileşen görevlerini doğru ayırmak, senaryonun hem okunabilir hem tekrar kullanılabilir olmasını sağlar.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Thread Group içinde fazla listener çalıştırmak, test üreticinin performansını düşürür.</div>
+  </section>
+
+  <section class="card" id="basit-plan">
+    <h2>2) Basit Bir Test Planı Oluşturma (Tıkla → Gör → Yap → Gözlemle)</h2>
+    <ol>
+      <li>Sol üstten <strong>File</strong> → <strong>New Test Plan</strong>.</li>
+      <li>Test Plan'a sağ tık: <strong>Add → Threads (Users) → Thread Group</strong>.</li>
+      <li>Thread Group alanında: Number of Threads (Users)=100, Ramp-Up=60, Loop Count=5 girin.</li>
+      <li>Thread Group'a sağ tık: <strong>Add → Sampler → HTTP Request</strong>.</li>
+      <li>Server Name, Path, Method bilgilerini doldurun.</li>
+      <li>Gerekli header için: <strong>Add → Config Element → HTTP Header Manager</strong>.</li>
+      <li>Yanıt kontrolü için: <strong>Add → Assertions → Response Assertion</strong>.</li>
+      <li>Sonuç için: <strong>Add → Listener → Summary Report</strong>.</li>
+      <li>Üstteki <strong>Start</strong> butonuna basın, sonuçları gözlemleyin.</li>
+    </ol>
+    <div class="box"><strong>Neden Önemli?</strong><br>Bu temel akış tüm ileri seviye senaryoların iskeletidir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Ramp-up çok kısa verilirse gerçekçi olmayan ani yük oluşur.</div>
+  </section>
+
+  <section class="card" id="api">
+    <h2>3) Web ve API Testleri: Method, Header, Body, Auth, Token</h2>
+    <p>JMeter'da HTTP Request içinde method seçimi yapılır: GET okuma, POST oluşturma, PUT güncelleme, DELETE silme işlemleri için kullanılır.</p>
+    <p>Authentication için en sık yöntem token taşımaktır. Header Manager içine Authorization alanı eklenir.</p>
+    <div class="copy-block"><pre>Authorization: Bearer eyJhbGciOi...</pre></div>
+    <p>Response kontrolünde sadece HTTP 200 değil, body içinde iş sonucu alanlarını da doğrulamak gerekir.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>Başarılı görünen HTTP kodu, iş sonucu başarısızsa yalancı başarı üretebilir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece status code assertion koyup uygulama mesajını doğrulamamak.</div>
+  </section>
+
+  <section class="card" id="postman">
+    <h2>4) Postman ile API Hazırlama ve JMeter'a Aktarma</h2>
+    <ol>
+      <li>Postman açın → <strong>New</strong> → <strong>HTTP Request</strong>.</li>
+      <li>URL ve method girin, Authorization sekmesinden token yapısını doğrulayın.</li>
+      <li><strong>Send</strong> ile yanıtı kontrol edin; doğruysa sağ üstte <strong>Code</strong> butonuna tıklayın.</li>
+      <li>cURL formatını seçip metni kopyalayın.</li>
+      <li>JMeter'da HTTP Request ve Header Manager açıp cURL içeriğini alanlara dağıtın.</li>
+      <li><strong>View Results Tree</strong> ile istek/yanıt detayını kontrol edin.</li>
+    </ol>
+    <div class="copy-block"><pre>curl --location 'https://ornek/api/order' \
+--header 'Authorization: Bearer TOKEN' \
+--header 'Content-Type: application/json' \
+--data '{"orderNo":"100045"}'</pre></div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Postman doğrulaması sayesinde JMeter'a taşınan isteğin fonksiyonel doğruluğu korunur.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Postman'daki otomatik header'ları JMeter'a taşımayı unutmak 401/415 hatasına neden olabilir.</div>
+  </section>
+
+  <section class="card" id="ileri">
+    <h2>5) JMeter Senaryoları: CSV Data Set, Dinamik Parametre, Correlation</h2>
+    <p>Gerçek kullanıcı gibi davranmak için sabit veri yerine CSV Data Set Config kullanılır. Her sanal kullanıcı farklı müşteri numarası, ürün kodu veya tarih gönderebilir.</p>
+    <ol>
+      <li>Thread Group'a sağ tık → <strong>Add → Config Element → CSV Data Set Config</strong>.</li>
+      <li>Filename alanına csv dosya yolunu yazın.</li>
+      <li>Variable Names alanına sütun adlarını girin (musteriNo, urunKodu).</li>
+      <li>HTTP Request içinde bu değerleri ${musteriNo} gibi kullanın.</li>
+    </ol>
+    <p>Correlation için bir istekte dönen session id veya token'ı çıkarıp sonraki istekte kullanın.</p>
+    <div class="copy-block"><pre>Regex Extractor örneği
+Reference Name: sessionId
+Regular Expression: "sessionId":"(.+?)"
+Template: $1$
+Match No: 1</pre></div>
+    <p>Assertions ve timer ile gerçek kullanıcı davranışı taklit edilir; düşünme süresi olmayan test gerçekçi olmaz.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>Parametrizasyon ve correlation olmadan test, aynı kullanıcıyı tekrar eden yapay bir trafik üretir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Token yenilenme süresi dikkate alınmadığında uzun testlerde toplu 401 hatası oluşur.</div>
+  </section>
+
+  <section class="card" id="birlesik">
+    <h2>6) Mobil/Web/API Trafiğini JMeter'da Tek Çatı Altında Toplama</h2>
+    <p>Aynı backend'i farklı kanallar farklı şekilde zorlar. Bu yüzden ayrı Thread Group'lar ile karma yük modeli kurulur.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kanal</th><th>Örnek İşlem</th><th>Yük Oranı</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td>Web</td><td>Sorgu + rapor</td><td>%40</td><td>Daha uzun response payload</td></tr>
+          <tr><td>Mobil</td><td>Kısa listeleme</td><td>%35</td><td>Daha sık ama hafif çağrı</td></tr>
+          <tr><td>API/Entegrasyon</td><td>Toplu veri aktarımı</td><td>%25</td><td>Arka planda sürekli akış</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Tek kanal testi yerine karma kanal testi, gerçek canlı davranışına daha yakın sonuç verir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece mobil trafiği test edip entegrasyon yükünü dışarıda bırakmak, üretimde beklenmeyen darboğaz yaratır.</div>
+  </section>
+
+  <section class="card" id="ozet">
+    <h2>Modül Özeti</h2>
+    <p>Bu modülde JMeter'ın yapı taşlarını, API odaklı test hazırlığını ve gerçekçi trafik modellemesini adım adım tamamladınız.</p>
+    <h3>Bu Modülde Öğrendikleriniz</h3>
+    <ul>
+      <li>Test Plan, Thread Group, Sampler, Listener, Assertion, Timer mantığı</li>
+      <li>UI üzerinden adım adım test planı kurma yaklaşımı</li>
+      <li>GET/POST/PUT/DELETE, header/body, token ve auth kullanımı</li>
+      <li>Postman doğrulamasından JMeter'a güvenli aktarım akışı</li>
+      <li>CSV parametrizasyon, correlation ve session yönetimi</li>
+    </ul>
+  </section>
+
+  <div class="nav"><a href="2. Performans Test Metrikleri.html">⟵ Önceki Konu</a><a href="4. Yük Testi Senaryolarının Oluşturulması.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>
+document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});
+</script>
+</body>
+</html>

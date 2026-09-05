@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modül 9 - Performans Testlerinde En İyi Uygulamalar</title>
+<style>
+:root{--card:#fff;--ink:#1f2937;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+.wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+h1,h2{color:var(--brand)}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}.box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+.copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+.copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card"><h1>Modül 9: Performans Testlerinde En İyi Uygulamalar</h1><p>Bu kapanış modülünde sürdürülebilir performans test pratiği için standartları, sık hataları ve kendi ortamınıza uyarlayacağınız yol haritasını öğreneceksiniz.</p></section>
+
+<nav class="card toc"><h2>İçindekiler / Bölüm Haritası</h2><ul>
+<li><a href="#plan">Test Planlamada En İyi Uygulamalar</a></li>
+<li><a href="#degerlendirme">Sonuç Değerlendirmede En İyi Uygulamalar</a></li>
+<li><a href="#hatalar">Sık Yapılan Hatalar ve Kaçınma Yöntemi</a></li>
+<li><a href="#kapanis">Kapanış ve Sonraki Adım Yol Haritası</a></li>
+<li><a href="#ozet">Modül Özeti</a></li>
+</ul></nav>
+
+<section class="card" id="plan">
+<h2>1) Test Planlamada En İyi Uygulamalar</h2>
+<ul>
+<li>Gerçekçi kullanıcı yükü ve iş akışı oranlarıyla senaryo kurun.</li>
+<li>Başarı kriterlerini test öncesinde yazılı hale getirin.</li>
+<li>Üretime benzer test ortamı sağlayın.</li>
+<li>Yükü kademeli artırarak kırılma eşiğini görünür kılın.</li>
+</ul>
+<div class="box"><strong>Neden Önemli?</strong><br>Planlama kalitesi düşükse, en gelişmiş araçlar bile yanıltıcı sonuç üretir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tek seferlik, plansız test koşumu; tekrar edilebilirlik üretmez.</div>
+</section>
+
+<section class="card" id="degerlendirme">
+<h2>2) Sonuç Değerlendirmede En İyi Uygulamalar</h2>
+<ul>
+<li>Ortalamaya tek başına güvenmeyin, 90/95/99 percentile'ları birlikte okuyun.</li>
+<li>JMeter metriklerini CPU/memory/network/DB verileriyle eşleştirin.</li>
+<li>Aynı senaryoyu belirli aralıklarla tekrarlayıp trend analizi yapın.</li>
+<li>Raporlarda bulgu cümlesini "işlem + katman + kanıt" formatında yazın.</li>
+</ul>
+<div class="copy-block"><pre>İdeal bulgu cümlesi
+Satınalma kayıt endpoint'inde 95th response time 2.2s -> 4.7s çıktı.
+Aynı dakikada DB lock bekleme süresi 8 kat arttı.
+Kök neden adayı: veritabanı kilitlenme davranışı.</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Kanıt tabanlı değerlendirme, ekipler arası tartışmayı azaltır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece JMeter çıktısına bakıp sistem kaynaklarını değerlendirmemek.</div>
+</section>
+
+<section class="card" id="hatalar">
+<h2>3) Sık Yapılan Hatalar ve Çözüm Pratikleri</h2>
+<ul>
+<li><strong>Hata:</strong> Gerçekçi olmayan yük modeli. <strong>Çözüm:</strong> İş birimiyle oran bazlı trafik dağılımı çıkarın.</li>
+<li><strong>Hata:</strong> Kaynak izleme yok. <strong>Çözüm:</strong> Grafana/Dynatrace panellerini test öncesi hazır edin.</li>
+<li><strong>Hata:</strong> Test ortamını göz ardı etme. <strong>Çözüm:</strong> Ortam farklılıklarını raporda açık yazın.</li>
+<li><strong>Hata:</strong> Tek koşumla karar verme. <strong>Çözüm:</strong> Aynı senaryoyu en az 2-3 tekrar çalıştırın.</li>
+<li><strong>Hata:</strong> Yanlış yorum. <strong>Çözüm:</strong> Percentile + kaynak + hata oranı üçlüsüyle yorumlayın.</li>
+</ul>
+<div class="box"><strong>Neden Önemli?</strong><br>Sık hatalardan kaçınmak, test olgunluğunu hızlı yükseltir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Başarı kriteri değişken bırakılırsa rapor karşılaştırmaları anlamsızlaşır.</div>
+</section>
+
+<section class="card" id="kapanis">
+<h2>4) Kapanış: Kendi Ortamınızda İlerleme Yol Haritası</h2>
+<ol>
+<li>İlk 2 hafta: Kritik 3 iş akışını seçin, başarı kriterlerini netleştirin.</li>
+<li>3-4. hafta: JMeter senaryolarını oluşturun, non-GUI koşum alışkanlığı kazanın.</li>
+<li>5-6. hafta: InfluxDB/Grafana dashboard'larını standart hale getirin.</li>
+<li>7-8. hafta: Dynatrace ile katman bazlı kök neden raporlama disiplinini oturtun.</li>
+<li>Sürekli: Senaryoları Git üzerinde versiyonlayın ve her sürümde kıyaslama yapın.</li>
+</ol>
+<div class="copy-block"><pre>Git tekrar akışı
+git add .
+git commit -m "Sürüm 1.3 performans testi güncellemesi"
+git push</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Yol haritası yaklaşımı, performans testini tek etkinlik değil kurumsal süreç haline getirir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Rutin tekrar yapılmazsa test varlıkları güncelliğini hızla kaybeder.</div>
+</section>
+
+<section class="card" id="ozet">
+<h2>Modül Özeti</h2>
+<p>Bu son modülde planlama, yorumlama ve sürekli iyileştirme pratiklerini bir araya getirerek kendi kurumunuzda sürdürülebilir performans testi yaklaşımını çerçevelediniz.</p>
+<h3>Bu Modülde Öğrendikleriniz</h3>
+<ul>
+<li>Gerçekçi planlama ve başarı kriteri disiplini</li>
+<li>Percentile ve kaynak korelasyonlu sonuç değerlendirme</li>
+<li>Sık hataları önleyen operasyonel pratikler</li>
+<li>Adım adım kurumsal yol haritası oluşturma</li>
+<li>Git ile senaryo ve sonuçların versiyonlu paylaşımı</li>
+</ul>
+</section>
+
+<div class="nav"><a href="8. Uygulamalı Performans Testi.html">⟵ Önceki Konu</a><a href="#">Sonraki Konu ⟶</a></div>
+</div>
+<script>document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});</script>
+</body>
+</html>

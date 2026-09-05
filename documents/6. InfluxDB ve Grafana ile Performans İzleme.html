@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modül 6 - InfluxDB ve Grafana ile Performans İzleme</title>
+<style>
+:root{--card:#fff;--ink:#1f2937;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+.wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+h1,h2{color:var(--brand)}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}.box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+.copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+.copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card"><h1>Modül 6: InfluxDB ve Grafana ile Performans İzleme</h1><p>Bu modülde JMeter testleri sırasında metrikleri canlı izlemek için InfluxDB ve Grafana entegrasyonunu uçtan uca kuracağız.</p></section>
+
+<nav class="card toc"><h2>İçindekiler / Bölüm Haritası</h2><ul>
+<li><a href="#monitoring">Monitoring Nedir?</a></li>
+<li><a href="#influx">InfluxDB Mantığı ve JMeter Verisi</a></li>
+<li><a href="#backend">JMeter Backend Listener Konfigürasyonu</a></li>
+<li><a href="#grafana">Grafana Dashboard Oluşturma</a></li>
+<li><a href="#e2e">Uçtan Uca Akış ve Gerçek Zamanlı Yorum</a></li>
+<li><a href="#ozet">Modül Özeti</a></li>
+</ul></nav>
+
+<section class="card" id="monitoring">
+<h2>1) Monitoring Nedir ve Neden Gerekli?</h2>
+<p>Monitoring, test sırasında metrikleri anlık izleyerek performans kırılmalarını canlı görmeyi sağlar. Test bitimini beklemeden riskli davranış yakalanır.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>Canlı izleme, test sırasında yanlış konfigürasyonu erken fark ettirir ve zaman kaybını azaltır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece test sonunda JTL dosyası okumak, olay anındaki sistem davranışını kaçırır.</div>
+</section>
+
+<section class="card" id="influx">
+<h2>2) InfluxDB Nedir? JMeter Verisi Nasıl Saklanır?</h2>
+<p>InfluxDB zaman serisi veritabanıdır. JMeter her isteğin metriklerini etiketli şekilde InfluxDB'ye yazar; Grafana bu verileri sorgular.</p>
+<div class="copy-block"><pre>Doğrulama komutları
+curl -I http://localhost:8086/ping
+docker ps</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Zaman damgalı veri saklama, yük arttıkça metrik kırılımını doğru analiz etmeyi sağlar.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Yanlış database adı kullanmak nedeniyle JMeter verisi boş tabloya yazılabilir.</div>
+</section>
+
+<section class="card" id="backend">
+<h2>3) JMeter Backend Listener Kurulumu (Tıkla → Gör → Yap)</h2>
+<ol>
+<li>Thread Group üzerinde sağ tık: <strong>Add → Listener → Backend Listener</strong>.</li>
+<li>Implementation alanında InfluxDB backend client seçin (plugin sürümüne göre ad değişebilir).</li>
+<li>Parametrelerde InfluxDB URL, database adı, application etiketi girin.</li>
+<li>Save ve test koşumu ile veri akışını başlatın.</li>
+</ol>
+<div class="copy-block"><pre>Örnek parametreler
+influxdbUrl=http://localhost:8086/write?db=jmeter
+application=ERP-Perf-Test
+measurement=jmeter</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Doğru backend listener ayarı yoksa Grafana paneli boş görünür.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>URL içinde db parametresini yanlış yazmak veya firewall nedeniyle 8086 erişimini unutmamak gerekir.</div>
+</section>
+
+<section class="card" id="grafana">
+<h2>4) Grafana Dashboard Oluşturma ve Metrik Görselleştirme</h2>
+<ol>
+<li>Grafana'ya giriş: http://localhost:3000</li>
+<li>Sol menü: <strong>Connections → Data sources → Add data source</strong>.</li>
+<li>InfluxDB seçin, URL ve database alanlarını doldurun, <strong>Save & Test</strong>.</li>
+<li><strong>Dashboards → New → Add visualization</strong> ile panel ekleyin.</li>
+<li>Sırasıyla Response Time, Throughput, Error Rate, Active Users panellerini oluşturun.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Tek ekranda metrikleri yan yana görmek yorum hızını ve karar kalitesini artırır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Farklı panel time range ayarları, metrikleri yanlış karşılaştırmaya neden olabilir.</div>
+</section>
+
+<section class="card" id="e2e">
+<h2>5) JMeter + InfluxDB + Grafana Uçtan Uca Akış</h2>
+<ol>
+<li>JMeter'da senaryoyu başlatın (tercihen non-GUI).</li>
+<li>Backend Listener metrikleri InfluxDB'ye akıtır.</li>
+<li>Grafana dashboard'ta anlık eğrileri izleyin.</li>
+<li>Kırılma anında kullanıcı yükü, response ve error davranışını birlikte yorumlayın.</li>
+</ol>
+<div class="copy-block"><pre>Non-GUI örneği
+jmeter -n -t erp_load_test.jmx -l sonuc.jtl</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Bu akış test sırasında kök neden adaylarını canlı tespit etmenizi sağlar.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>GUI modda uzun yük koşturup JMeter kaynak tüketimi ile sonuçları bozmak.</div>
+</section>
+
+<section class="card" id="ozet">
+<h2>Modül Özeti</h2>
+<p>Bu modülde test metriklerini canlı toplama ve görselleştirme altyapısını kurdunuz; artık testleri gözle görünür panellerle yönetebilirsiniz.</p>
+<h3>Bu Modülde Öğrendikleriniz</h3>
+<ul>
+<li>Monitoring yaklaşımının performans testiyle ilişkisi</li>
+<li>InfluxDB'ye metrik yazma mantığı</li>
+<li>Backend Listener ile JMeter entegrasyonu</li>
+<li>Grafana data source ve dashboard oluşturma adımları</li>
+<li>Uçtan uca gerçek zamanlı yorumlama disiplini</li>
+</ul>
+</section>
+
+<div class="nav"><a href="5. JMeter Test Sonuçlarının Okunması ve Yorumlanması.html">⟵ Önceki Konu</a><a href="7. Dynatrace ile Performans Analizi.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});</script>
+</body>
+</html>

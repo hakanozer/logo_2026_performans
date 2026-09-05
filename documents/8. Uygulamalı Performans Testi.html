@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modül 8 - Uygulamalı Performans Testi</title>
+<style>
+:root{--card:#fff;--ink:#1f2937;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+.wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+h1,h2{color:var(--brand)}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}.box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+.copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+.copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card"><h1>Modül 8: Uygulamalı Performans Testi</h1><p>Bu modülde örnek bir Web/REST API uygulaması üzerinde uçtan uca yük testi kurup çalıştıracak, sonuçları JMeter + Grafana + Dynatrace ile birlikte yorumlayacaksınız.</p></section>
+
+<nav class="card toc"><h2>İçindekiler / Bölüm Haritası</h2><ul>
+<li><a href="#hazirlik">Senaryo Hazırlığı: İşlemler, Yük ve Başarı Kriterleri</a></li>
+<li><a href="#jmeter-kur">JMeter Senaryo Kurulumu ve Yük Uygulama</a></li>
+<li><a href="#analiz">JMeter + Grafana + Dynatrace Birlikte Analiz</a></li>
+<li><a href="#rapor">Performans Test Raporu Hazırlama</a></li>
+<li><a href="#sablon">İndirilebilir Rapor Şablonu</a></li>
+<li><a href="#ozet">Modül Özeti</a></li>
+</ul></nav>
+
+<section class="card" id="hazirlik">
+<h2>1) Uçtan Uca Senaryo Hazırlığı</h2>
+<p>Örnek uygulama: Sipariş yönetim API'si. Kritik işlemler: giriş, ürün arama, sipariş oluşturma, sipariş sorgulama. İş birimiyle birlikte yük modeli belirlenir.</p>
+<ol>
+<li>Başarı kriteri yazın: 95th response time ≤ 2.5 sn, error rate ≤ %1.</li>
+<li>Yük profili yazın: normal 150 kullanıcı, peak 300 kullanıcı, stress 450 kullanıcı.</li>
+<li>Test süresi yazın: 10 dk warm-up + 20 dk load + 15 dk stress.</li>
+<li>Veri seti yazın: müşteri, ürün, depo ve fiyat kombinasyonları.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Başarı kriteri net olmayan testte sonuç yorumu kişiden kişiye değişir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Üretimde hiç görülmeyen veri dağılımı kullanmak, gerçeği temsil etmeyen sonuç üretir.</div>
+</section>
+
+<section class="card" id="jmeter-kur">
+<h2>2) JMeter ile Senaryo Kurulumu ve Load/Stress Test Çalıştırma</h2>
+<ol>
+<li>JMeter'da Test Plan açın, üç ayrı Thread Group oluşturun: warm-up, load, stress.</li>
+<li>HTTP Request sampler'ları işlemlere göre ekleyin.</li>
+<li>CSV Data Set Config ile test verisini bağlayın.</li>
+<li>Response Assertion ve Duration Assertion ekleyin.</li>
+<li>Backend Listener ile InfluxDB gönderimini açın.</li>
+<li>Ön kontrolü GUI'de kısa koşun, tam testi non-GUI ile başlatın.</li>
+</ol>
+<div class="copy-block"><pre>jmeter -n -t uygulamali_test.jmx -l uygulamali_sonuc.jtl</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Non-GUI koşum gerçek yükte daha güvenilir sonuç üretir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tek Thread Group içinde tüm yükü karıştırmak, hangi aşamada kırıldığını görmeyi zorlaştırır.</div>
+</section>
+
+<section class="card" id="analiz">
+<h2>3) JMeter + Grafana + Dynatrace ile Birlikte Analiz</h2>
+<p>Analiz akışı: JMeter'dan metrik kırılması, Grafana'dan zaman trendi, Dynatrace'ten katman kök nedeni.</p>
+<ol>
+<li>JMeter raporunda 95th percentile artış anını not edin.</li>
+<li>Grafana panelinde aynı dakikadaki throughput ve error eğrisini kontrol edin.</li>
+<li>Dynatrace'te aynı zaman penceresinde yavaş servis ve DB çağrılarını inceleyin.</li>
+<li>Darboğazı tek cümleyle yazın: "Hangi işlem, hangi katman, hangi kanıt".</li>
+</ol>
+<div class="copy-block"><pre>Örnek sonuç cümlesi
+300 kullanıcı sonrası sipariş oluşturma endpoint'inde 95th 2.3s -> 5.1s yükseldi.
+Dynatrace trace'de OrderDB insert çağrısı 220ms -> 2.2s oldu.
+Darboğaz: veritabanı yazma katmanı.</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Birleşik yorum, iyileştirme ekiplerine net ve uygulanabilir aksiyon üretir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece tek araca bakmak, semptomu görüp nedeni kaçırmaya yol açar.</div>
+</section>
+
+<section class="card" id="rapor">
+<h2>4) Performans Test Raporunun Hazırlanması</h2>
+<p>Rapor; test ortamı, senaryo, yük profili, metrik sonuçları, problemler, kapasite değerlendirmesi ve önerileri içermelidir.</p>
+<ol>
+<li>Ortam: sunucu özellikleri, sürümler, network/topoloji bilgisi.</li>
+<li>Senaryo: hangi işlem, kaç kullanıcı, ne kadar süre.</li>
+<li>Sonuç: percentile, throughput, error rate, kaynak grafikleri.</li>
+<li>Bulgular: yavaş endpoint, kök neden, etki seviyesi.</li>
+<li>Kapasite yorumu: güvenli kullanıcı bandı ve riskli eşikler.</li>
+<li>Öneriler: kısa vadeli ve orta vadeli iyileştirme maddeleri.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Rapor, testin kurumsal hafızasıdır; sonraki sürümlerde karşılaştırma için temel alınır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Test ortamı bilgisi yazılmadan paylaşılan sonuçlar tekrar üretilemez.</div>
+</section>
+
+<section class="card" id="sablon">
+<h2>5) İndirilebilir Örnek Rapor Şablonu Taslağı</h2>
+<p>Aşağıdaki buton ile örnek şablonu markdown dosyası olarak indirebilirsiniz.</p>
+<button class="btn" id="downloadTemplate">Rapor Şablonunu İndir</button>
+<div class="copy-block"><pre>Rapor Başlığı: Performans Test Sonuç Raporu
+1. Test Amacı
+2. Test Ortamı
+3. Senaryo ve İş Yükü
+4. Başarı Kriterleri
+5. Bulgular (JMeter/Grafana/Dynatrace)
+6. Darboğaz ve Kök Neden
+7. Kapasite Değerlendirmesi
+8. İyileştirme Önerileri
+9. Ekler (Grafikler, JTL, Dashboard ekranları)</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Standart şablon, ekipler arası rapor tutarlılığını artırır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Raporu yalnız ham tabloyla bırakmak; karar vericiler için etkisini düşürür.</div>
+</section>
+
+<section class="card" id="ozet">
+<h2>Modül Özeti</h2>
+<p>Bu modülde uçtan uca performans testi pratiğini tamamladınız: hazırlık, yük uygulama, çoklu araçla analiz ve raporlama.</p>
+<h3>Bu Modülde Öğrendikleriniz</h3>
+<ul>
+<li>Gerçekçi yük ve başarı kriteri tanımlama</li>
+<li>JMeter ile load ve stress test kurgulama</li>
+<li>Grafana ve Dynatrace ile kanıt zinciri oluşturma</li>
+<li>Darboğazı katman bazında raporlama</li>
+<li>İndirilebilir standart rapor şablonu kullanımı</li>
+</ul>
+</section>
+
+<div class="nav"><a href="7. Dynatrace ile Performans Analizi.html">⟵ Önceki Konu</a><a href="9. Performans Testlerinde En İyi Uygulamalar.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>
+document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});
+
+document.getElementById('downloadTemplate').addEventListener('click', function(){
+  var text = [
+    '# Performans Test Sonuç Raporu',
+    '',
+    '## 1. Test Amacı',
+    '- Uygulamanın hedef yük altındaki davranışının değerlendirilmesi',
+    '',
+    '## 2. Test Ortamı',
+    '- Sunucu özellikleri, sürümler, ağ bilgisi',
+    '',
+    '## 3. Senaryo ve İş Yükü',
+    '- İşlem listesi, kullanıcı modeli, süre',
+    '',
+    '## 4. Başarı Kriterleri',
+    '- 95th response time, throughput, error rate hedefleri',
+    '',
+    '## 5. Bulgular',
+    '- JMeter, Grafana, Dynatrace çıktıları',
+    '',
+    '## 6. Darboğaz ve Kök Neden',
+    '- Katman bazlı bulgu özeti',
+    '',
+    '## 7. Kapasite Değerlendirmesi',
+    '- Güvenli kapasite ve riskli eşikler',
+    '',
+    '## 8. İyileştirme Önerileri',
+    '- Kısa/orta vadeli aksiyonlar',
+    '',
+    '## 9. Ekler',
+    '- Grafikler, jtl dosyaları, dashboard çıktıları'
+  ].join('\n');
+  var blob = new Blob([text], {type:'text/markdown;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'performans_test_rapor_sablonu.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

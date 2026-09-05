@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modül 7 - Dynatrace ile Performans Analizi</title>
+<style>
+:root{--card:#fff;--ink:#1f2937;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+.wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+h1,h2{color:var(--brand)}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}.box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+.copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+.copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card"><h1>Modül 7: Dynatrace ile Performans Analizi</h1><p>Bu modülde Dynatrace APM yaklaşımıyla yük testi sırasında servis davranışını izleyip kök nedeni katman bazında belirleyeceksiniz.</p></section>
+
+<nav class="card toc"><h2>İçindekiler / Bölüm Haritası</h2><ul>
+<li><a href="#apm">Dynatrace ve APM Kavramı</a></li>
+<li><a href="#izleme">Uygulama ve Servis İzleme</a></li>
+<li><a href="#jmeter-izleme">JMeter Yükü Altında Davranış İzleme</a></li>
+<li><a href="#yavas">Yavaş Servis/Transaction Tespiti</a></li>
+<li><a href="#rca">Root Cause Analysis Katmanları</a></li>
+<li><a href="#birlikte">JMeter ve Dynatrace Verilerini Birlikte Değerlendirme</a></li>
+<li><a href="#moderator">Moderatör Örnek Akışı</a></li>
+<li><a href="#ozet">Modül Özeti</a></li>
+</ul></nav>
+
+<section class="card" id="apm">
+<h2>1) Dynatrace Nedir? APM Neyi Çözer?</h2>
+<p>APM, uygulama performansını servis zinciri boyunca izleyip gecikmenin hangi katmanda oluştuğunu gösterir. Dynatrace bu analizi otomatik topoloji ve bağımlılık görünümü ile hızlandırır.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>JMeter size "ne kadar yavaş" sorusunu, Dynatrace ise "neden yavaş" sorusunu yanıtlar.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>APM verisini sadece altyapı ekranı gibi kullanmak; transaction düzeyine inmemek.</div>
+</section>
+
+<section class="card" id="izleme">
+<h2>2) Uygulama ve Servislerin İzlenmesi</h2>
+<ol>
+<li>Dynatrace ana menüde <strong>Applications</strong> ve <strong>Services</strong> görünümünü açın.</li>
+<li>Test edilen uygulamayı seçin, response time ve failure rate trendlerini izleyin.</li>
+<li>Bağımlı servis çağrılarını service flow üzerinde kontrol edin.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Servis akışı görülmeden yalnız endpoint seviyesinde kalınırsa zincir etkisi kaçabilir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Test penceresini zaman filtresiyle sınırlandırmamak geçmiş verilerle karışıklık yaratır.</div>
+</section>
+
+<section class="card" id="jmeter-izleme">
+<h2>3) JMeter ile Yük Oluştururken Dynatrace İzleme</h2>
+<p>Yük artış adımlarında Dynatrace panelini canlı açık tutun. Active users yükselirken hangi servislerin response time eğrisi ilk kırılıyor takip edin.</p>
+<div class="copy-block"><pre>Önerilen kontrol sırası
+1) JMeter active users
+2) Dynatrace service response time
+3) Dynatrace failure rate
+4) Process CPU/memory
+5) DB call duration</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Kırılma anında izleme, sonradan yapılan tahminden daha güvenilir kök neden üretir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Test sonunda geriye dönük bakarken zaman işaretleri kaybolabilir; önemli anlar not edilmelidir.</div>
+</section>
+
+<section class="card" id="yavas">
+<h2>4) Yavaş Servis/Transaction Tespiti</h2>
+<p>Dynatrace'de servis listesinde response time'a göre sıralayın. Yavaş servis seçildikten sonra PurePath/trace detayında en çok süre tüketen çağrıyı bulun.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>İyileştirme ekiplerine "hangi servis, hangi çağrı, hangi süre" netliği ile aksiyon açılır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>En çok çağrılan servis ile en yavaş servisi karıştırmak yanlış önceliklendirme yaratır.</div>
+</section>
+
+<section class="card" id="rca">
+<h2>5) Root Cause Analysis: Sorun Hangi Katmanda?</h2>
+<ul>
+<li><strong>Application:</strong> Kod yolu veya thread beklemesi</li>
+<li><strong>Service:</strong> Mikroservis bağımlılık gecikmesi</li>
+<li><strong>Database:</strong> Yavaş sorgu, lock, connection limit</li>
+<li><strong>Infrastructure:</strong> CPU/memory/disk baskısı</li>
+<li><strong>External Service:</strong> 3. parti API gecikmesi</li>
+</ul>
+<div class="box"><strong>Neden Önemli?</strong><br>Katman bazlı RCA, doğru ekibe net sorumluluk verir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tek katmana odaklanıp çok katmanlı problemlerde zincir etkisini kaçırmak.</div>
+</section>
+
+<section class="card" id="birlikte">
+<h2>6) JMeter Sonuçları ile Dynatrace Verilerini Birlikte Değerlendirme</h2>
+<p>JMeter 95th percentile artışı görülen dakika, Dynatrace trace ve servis hata oranıyla eşleştirilir. Böylece semptom ve kök neden aynı raporda birleşir.</p>
+<div class="copy-block"><pre>Örnek birleşik bulgu
+JMeter 95th RT: 2.1s -> 4.9s (14:32)
+Dynatrace: PaymentService DB call 180ms -> 1900ms (14:32)
+Sonuç: Darboğaz veritabanı çağrısı katmanında</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Birleşik analiz, teknik ve iş paydaşlarına güven veren kanıt zinciri oluşturur.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>JMeter ve Dynatrace saat senkronu kontrol edilmezse yanlış korelasyon oluşur.</div>
+</section>
+
+<section class="card" id="moderator">
+<h2>7) Moderatörün Dynatrace ile Ürün Testi Yürütme Örneği</h2>
+<p>Moderatör önce test öncesi baseline çıkarır: düşük yükte normal response ve servis sürelerini kaydeder. Test sırasında her yük basamağında Dynatrace dashboard üzerinden ilk kırılan servisi not eder. Test sonunda JMeter raporundaki kırılma anlarını Dynatrace trace ekranıyla eşleştirerek "hangi modülde, hangi katmanda, hangi kanıtla" formatında bulgu raporu hazırlar.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>Süreç disiplinli yürütüldüğünde tartışmalı yorumlar azalır, aksiyon planı hızlanır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Baseline almadan doğrudan yüksek yüke geçmek, anomali ile normal davranışı ayırmayı zorlaştırır.</div>
+</section>
+
+<section class="card" id="ozet">
+<h2>Modül Özeti</h2>
+<p>Bu modülde Dynatrace ile APM izlemesini JMeter yük testine entegre ederek katman bazlı kök neden çıkarma yaklaşımını öğrendiniz.</p>
+<h3>Bu Modülde Öğrendikleriniz</h3>
+<ul>
+<li>APM ve Dynatrace'in performans testindeki rolü</li>
+<li>Servis ve transaction seviyesinde davranış takibi</li>
+<li>Yük artışında kırılma noktası gözlemleme yöntemi</li>
+<li>Katman bazlı root cause analysis</li>
+<li>JMeter ve Dynatrace verisini tek raporda birleştirme</li>
+</ul>
+</section>
+
+<div class="nav"><a href="6. InfluxDB ve Grafana ile Performans İzleme.html">⟵ Önceki Konu</a><a href="8. Uygulamalı Performans Testi.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});</script>
+</body>
+</html>

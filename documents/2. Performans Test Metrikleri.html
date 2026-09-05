@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modül 2 - Performans Test Metrikleri</title>
+  <style>
+    :root{--bg:#f5f8fc;--card:#fff;--ink:#1f2937;--muted:#607086;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+    .wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+    h1,h2{color:var(--brand)}h1{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 8px}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}
+    .box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+    .copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+    .copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+    .table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{background:#eef2f7}
+    .nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+    @media(max-width:800px){.toc ul{column-count:1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card">
+    <h1>Modül 2: Performans Test Metrikleri</h1>
+    <p>Bu modülde sonuçları doğru okumak için gereken temel metrikleri, metrikler arası ilişkiyi ve ERP/middleware özelinde eşik yorumlamayı öğreneceksiniz.</p>
+  </section>
+
+  <nav class="card toc">
+    <h2>İçindekiler / Bölüm Haritası</h2>
+    <ul>
+      <li><a href="#rt">Response Time ve Ortalama/Min/Max</a></li>
+      <li><a href="#pct">Percentile Değerleri</a></li>
+      <li><a href="#throughput">Throughput, RPS, Concurrent User, Error Rate</a></li>
+      <li><a href="#iliski">Kullanıcı Sayısı ile Performans İlişkisi</a></li>
+      <li><a href="#saturation">Doygunluk Noktasının Belirlenmesi</a></li>
+      <li><a href="#resource">CPU, Memory, Disk I/O, Network, DB Bağlantıları</a></li>
+      <li><a href="#baglanti">Kaynak Verilerini Test Sonuçlarıyla İlişkilendirme</a></li>
+      <li><a href="#erp-tablo">ERP/Middleware Karşılaştırma Tablosu</a></li>
+      <li><a href="#ozet">Modül Özeti</a></li>
+    </ul>
+  </nav>
+
+  <section class="card" id="rt">
+    <h2>1) Response Time, Average/Min/Max Response Time</h2>
+    <p>Response time, bir isteğin gönderilmesi ile yanıtın alınması arasındaki süredir. Min değer en hızlı isteği, max değer en yavaş isteği, average ise genel eğilimi gösterir.</p>
+    <p>Örnek: Ortalama 900 ms görülen bir işlemde max 8500 ms ise bazı kullanıcılar ciddi gecikme yaşıyor demektir.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>İş birimleri genelde gecikmeyi "bazı kullanıcılar çok bekliyor" diye tarif eder. Bu davranış max ve percentile değerlerinde görünür.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece average değere bakıp max ve dağılımı görmezden gelmek kullanıcı şikayetini gizler.</div>
+  </section>
+
+  <section class="card" id="pct">
+    <h2>2) Percentile (90th, 95th, 99th) ve Ortalamanın Sınırlılığı</h2>
+    <p>95th percentile, isteklerin %95'inin bu sürenin altında tamamlandığını söyler. Örneğin 95th = 2.4 sn ise isteklerin %5'i daha yavaştır.</p>
+    <div class="copy-block"><pre>Örnek yorum
+Average: 900 ms
+95th: 2400 ms
+99th: 5200 ms
+Sonuç: Uzun kuyruk etkisi var, az sayıdaki çok yavaş istek kullanıcı deneyimini bozuyor.</pre></div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Kurumsal SLA hedefleri çoğunlukla percentile tabanlıdır; ortalama tek başına operasyonel kaliteyi temsil etmez.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>"Ortalama iyi" diyerek 99th değeri atlamak, kritik kullanıcı grubunun yaşadığı problemi kaçırır.</div>
+  </section>
+
+  <section class="card" id="throughput">
+    <h2>3) Throughput, Requests per Second, Concurrent Users, Error Rate</h2>
+    <ul>
+      <li><strong>Throughput:</strong> Belirli sürede tamamlanan işlem miktarı.</li>
+      <li><strong>RPS:</strong> Saniye başına istek adedi.</li>
+      <li><strong>Concurrent Users:</strong> Aynı anda aktif olan kullanıcı sayısı.</li>
+      <li><strong>Error Rate:</strong> Başarısız istek oranı.</li>
+    </ul>
+    <p>Örnek: Kullanıcı 250'den 350'ye çıkınca throughput artmıyorsa, sistem doygunluğa yaklaşıyor olabilir.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>Kapasite planlaması, throughput artışı ve hata oranı davranışı birlikte okunarak yapılır.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Concurrent user ile throughput'u aynı kavram sanmak; yanlış kapasite hesabına neden olur.</div>
+  </section>
+
+  <section class="card" id="iliski">
+    <h2>4) Kullanıcı Sayısı - Response Time / Throughput İlişkisi</h2>
+    <p>Normalde kullanıcı artarken throughput bir süre artar, sonra plato yapar; response time ise belirli noktadan sonra hızla yükselir.</p>
+    <div class="copy-block"><pre>Tipik davranış
+50 kullanıcı: RT 400 ms, Throughput 120 rps
+150 kullanıcı: RT 800 ms, Throughput 280 rps
+300 kullanıcı: RT 2300 ms, Throughput 320 rps
+400 kullanıcı: RT 5200 ms, Throughput 318 rps</pre></div>
+    <p>Bu tabloda 300+ kullanıcıdan sonra throughput artmıyor, ama gecikme keskin yükseliyor: darboğaz sinyali.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>İşletme, "kaç kullanıcıya kadar güvenli çalışırız" sorusunun yanıtını bu eğriyle alır.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Yalnızca en yüksek kullanıcı sayısına bakıp eğriyi okumamak, sürdürülebilir kapasiteyi yanlış belirler.</div>
+  </section>
+
+  <section class="card" id="saturation">
+    <h2>5) Doygunluk (Saturation) Noktasının Belirlenmesi</h2>
+    <p>Doygunluk noktası; ek kullanıcı geldiğinde iş hacmi artmazken gecikmenin ve/veya hata oranının yükselmeye başladığı eşiği ifade eder.</p>
+    <ol>
+      <li>Kullanıcı yükünü kademeli artırın (ör. 50'şer artış).</li>
+      <li>Her kademede 95th response time, throughput ve error rate ölçün.</li>
+      <li>Eğrinin kırıldığı kullanıcı seviyesini not edin.</li>
+    </ol>
+    <div class="box"><strong>Neden Önemli?</strong><br>Kapasite yatırımı ve ölçekleme kararı için teknik eşiğin sayısallaştırılması gerekir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Yükü tek adımda çok yükseltmek, kırılma noktasının nerede başladığını belirsiz bırakır.</div>
+  </section>
+
+  <section class="card" id="resource">
+    <h2>6) Sistem Kaynakları: CPU, Memory, Disk I/O, Network, DB Bağlantıları</h2>
+    <p>Uygulama yavaşladığında sadece JMeter sonuçlarına değil, kaynak kullanımına da bakılır. Her kaynak farklı sorunu işaret eder:</p>
+    <ul>
+      <li>CPU yüksek: işlem yoğunluğu, kötü sorgu planı, sıkıştırma/şifreleme maliyeti.</li>
+      <li>Memory artışı: bellek sızıntısı veya yetersiz heap.</li>
+      <li>Disk I/O yüksek: loglama, raporlama, temp dosya baskısı.</li>
+      <li>Network gecikmesi: paket kaybı, bant daralması, aradaki güvenlik cihazı etkisi.</li>
+      <li>DB connection pool doluluğu: uygulama katmanında bekleme.</li>
+    </ul>
+    <div class="box"><strong>Neden Önemli?</strong><br>Doğru kaynak sinyalini görmek, problemi doğru ekibe yönlendirir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece CPU grafiğine odaklanmak; DB bağlantı tükenmesi gibi asıl nedeni kaçırabilir.</div>
+  </section>
+
+  <section class="card" id="baglanti">
+    <h2>7) Kaynak Verilerinin Test Sonuçlarıyla İlişkilendirilmesi</h2>
+    <p>Yorumlama mantığı: "hangi anda hangi metrik kırıldı" sorusunu zaman ekseninde eşleştirin.</p>
+    <ol>
+      <li>JMeter sonuçlarında 95th response time yükseliş anını not edin.</li>
+      <li>Aynı dakikada CPU, memory, DB pool ve network grafiğini açın.</li>
+      <li>Birlikte hareket eden metriği aday kök neden olarak işaretleyin.</li>
+    </ol>
+    <div class="copy-block"><pre>Örnek
+10:14'te 95th RT: 1.1s -> 3.8s
+10:14'te DB pool kullanım: %62 -> %100
+10:15'te Error Rate: %0.2 -> %3.4
+Yorum: Uygulama DB bağlantısı bekliyor, hata oranı bu bekleme sonrası yükseliyor.</pre></div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Korelasyon, tahmin yerine kanıt temelli karar alınmasını sağlar.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Zaman senkronizasyonu yapılmadan grafik okumak, yanlış katmanı suçlamaya yol açar.</div>
+  </section>
+
+  <section class="card" id="erp-tablo">
+    <h2>8) ERP/Middleware Modüllerinde Metrik ve Eşik Karşılaştırması</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Modül Tipi</th><th>Kritik Metrik</th><th>Beklenen Darboğaz</th><th>Örnek Eşik</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ERP Finans Kapanış</td><td>95th Response Time, DB I/O</td><td>Ağır sorgu ve rapor yazımı</td><td>95th ≤ 3 sn, Error ≤ %1</td></tr>
+          <tr><td>ERP Stok Sorgu</td><td>Throughput, Cache hit</td><td>Yoğun okuma trafiği</td><td>300 rps altında plato olmamalı</td></tr>
+          <tr><td>Middleware Mesaj Dönüşümü</td><td>Queue depth, CPU</td><td>Dönüşüm motoru CPU baskısı</td><td>Queue birikimi 2 dakikayı geçmemeli</td></tr>
+          <tr><td>EDI/Entegrasyon Geçidi</td><td>Error Rate, Network latency</td><td>Uzak servis gecikmesi</td><td>Error ≤ %0.5, gecikme artışı sınırlı</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Her modülün iş yükü karakteri farklıdır; tek eşik seti tüm modüller için doğru olmaz.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Raporlama modülünü online işlem modülüyle aynı metrik eşiğiyle değerlendirmek hatalıdır.</div>
+  </section>
+
+  <section class="card" id="ozet">
+    <h2>Modül Özeti</h2>
+    <p>Metrik okuma disiplininin temeli; response time dağılımı, throughput davranışı ve kaynak korelasyonunun birlikte değerlendirilmesidir.</p>
+    <h3>Bu Modülde Öğrendikleriniz</h3>
+    <ul>
+      <li>Average, min, max ve percentile değerlerinin doğru yorumu</li>
+      <li>Concurrent user, throughput, RPS ve error rate ilişkisi</li>
+      <li>Doygunluk noktasını veriyle belirleme yöntemi</li>
+      <li>CPU, memory, disk, network ve DB metriklerini sonuçla eşleştirme</li>
+      <li>ERP/middleware modülleri için farklı kritik eşik yaklaşımı</li>
+    </ul>
+  </section>
+
+  <div class="nav">
+    <a href="1. Performans ve Yük Testlerine Giriş.html">⟵ Önceki Konu</a>
+    <a href="3. Apache JMeter ile Yük Testleri.html">Sonraki Konu ⟶</a>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});
+</script>
+</body>
+</html>

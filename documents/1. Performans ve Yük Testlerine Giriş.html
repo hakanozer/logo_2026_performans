@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modül 1 - Performans ve Yük Testlerine Giriş</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #1f2a37;
+      --muted: #5b6b7f;
+      --brand: #0b3a67;
+      --accent: #0e7490;
+      --warn: #8a4b00;
+      --warn-bg: #fff7ed;
+      --ok-bg: #ecfeff;
+      --border: #d9e2ec;
+      --shadow: 0 10px 30px rgba(16, 42, 67, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #eef4ff 0%, #f8fafc 45%, #edf7f8 100%);
+      line-height: 1.65;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    h1 { margin: 0 0 8px; color: var(--brand); font-size: clamp(1.5rem, 3vw, 2.2rem); }
+    .subtitle { color: var(--muted); margin: 0; }
+    .toc, section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .toc ul { margin: 0; padding-left: 18px; column-count: 2; column-gap: 24px; }
+    .toc a { color: var(--brand); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    h2 { margin-top: 0; color: var(--brand); }
+    h3 { color: #0f4c81; margin-bottom: 8px; }
+    p, li { color: var(--ink); }
+    .box {
+      border-left: 5px solid var(--accent);
+      background: var(--ok-bg);
+      padding: 14px;
+      border-radius: 10px;
+      margin: 12px 0;
+    }
+    .warn {
+      border-left-color: #d97706;
+      background: var(--warn-bg);
+    }
+    .steps li { margin-bottom: 8px; }
+    .os-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .os-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfdff;
+    }
+    .copy-block {
+      position: relative;
+      margin: 10px 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      overflow: auto;
+      background: #0f172a;
+    }
+    .copy-block pre {
+      margin: 0;
+      padding: 14px;
+      color: #e2e8f0;
+      min-width: 520px;
+    }
+    .copy-btn {
+      position: sticky;
+      left: calc(100% - 98px);
+      top: 8px;
+      margin: 8px;
+      background: #e2e8f0;
+      color: #0f172a;
+      border: 0;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-weight: 600;
+      cursor: pointer;
+      float: right;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+    .table-wrap { overflow-x: auto; }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #eef2f7; }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+    .nav a {
+      text-decoration: none;
+      background: var(--brand);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    @media (max-width: 800px) {
+      .toc ul { column-count: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Modül 1: Performans ve Yük Testlerine Giriş</h1>
+      <p class="subtitle">Bu modül, performans testinin temel kavramlarını ve eğitim boyunca kullanacağımız tüm araçların kurulumunu adım adım öğretir.</p>
+    </header>
+
+    <nav class="toc">
+      <h2>İçindekiler / Bölüm Haritası</h2>
+      <ul>
+        <li><a href="#tanimlar">Performans ve Yük Testi Tanımları</a></li>
+        <li><a href="#test-turleri">Stress, Spike, Soak Test</a></li>
+        <li><a href="#fonksiyonel-fark">Fonksiyonel Test Farkı</a></li>
+        <li><a href="#uzman-rolu">Test Uzmanının Rolü</a></li>
+        <li><a href="#modul-secim">Test Edilecek Modüllerin Belirlenmesi</a></li>
+        <li><a href="#ortam">Test Ortamının Belirlenmesi</a></li>
+        <li><a href="#senaryo">Senaryo Oluşturma</a></li>
+        <li><a href="#kriterler">Kullanıcı Sayısı ve Başarı Kriterleri</a></li>
+        <li><a href="#ui-api">UI ve API Testlerinin Ayrıştırılması</a></li>
+        <li><a href="#teknoloji-tip">Uygulama Teknoloji Tipleri</a></li>
+        <li><a href="#stack-fark">Java/.NET/Node.js/Python Yaklaşımı</a></li>
+        <li><a href="#oz-degerlendirme">Öz Değerlendirme Soruları</a></li>
+        <li><a href="#kurulum">Tüm Araç Kurulumları</a></li>
+        <li><a href="#guvenlik-port">Güvenlik Duvarı ve Portlar</a></li>
+        <li><a href="#ozet">Modül Özeti</a></li>
+      </ul>
+    </nav>
+
+    <section id="tanimlar">
+      <h2>1) Performans Testi ve Yük Testi Nedir?</h2>
+      <p>Performans testi, bir uygulamanın belirli bir iş yükü altında ne kadar hızlı, stabil ve ölçeklenebilir çalıştığını ölçer. Yük testi ise bu performans testinin en yaygın türüdür ve sisteme beklenen gerçek kullanıcı yükü verilerek davranış gözlemlenir.</p>
+      <p>Örnek: ERP sipariş modülünde 200 eşzamanlı kullanıcı ile sipariş kaydetme işlemi yapılırken yanıt süreleri ve hata oranı ölçülür.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Canlıya geçmeden önce kapasite sınırlarını görmek, sonradan yaşanacak kesinti ve memnuniyetsizliği azaltır.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece ortalama süreye bakmak yanıltır. Kuyrukta bekleyen az sayıdaki çok yavaş istek, kullanıcı deneyimini ciddi bozabilir.</div>
+    </section>
+
+    <section id="test-turleri">
+      <h2>2) Stress, Spike ve Soak Test Kavramları</h2>
+      <ul>
+        <li><strong>Stress Test:</strong> Sistem sınırın ötesine zorlanır. Amaç kırılma noktasını bulmaktır.</li>
+        <li><strong>Spike Test:</strong> Yük çok kısa sürede ani artırılır. Amaç ani kampanya/duyuru etkisini görmek.</li>
+        <li><strong>Soak Test:</strong> Uzun süreli sabit yükte sistemin yıpranması gözlenir.</li>
+      </ul>
+      <p>Middleware örneği: Gece entegrasyon penceresinde 6 saat boyunca sabit mesaj akışında bellek sızıntısı var mı, soak test ile anlaşılır.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Her test türü farklı riski ortaya çıkarır; sadece load test yapmak üretim risklerini tam kapsamaz.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Spike testi yapmadan kampanya gününe çıkmak, ani yükte bağlantı havuzu tükenmelerine yol açabilir.</div>
+    </section>
+
+    <section id="fonksiyonel-fark">
+      <h2>3) Performans Testi ve Fonksiyonel Test Farkı</h2>
+      <p>Fonksiyonel test, "doğru sonuç geldi mi" sorusunu yanıtlar. Performans testi ise "doğru sonuç ne kadar sürede, kaç kullanıcıyla ve ne kadar stabil geliyor" sorusuna odaklanır.</p>
+      <p>Fonksiyonel testte 1 kullanıcı ile başarılı olan işlem, 300 kullanıcıda 12 saniyeye çıkabilir. Bu durumda fonksiyonel olarak doğru, performans olarak başarısızdır.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Kurumsal sistemlerde gecikme, fonksiyonel hatadan bağımsız şekilde iş kaybı yaratabilir.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece "hata yok" demek yetmez; SLA hedefleri karşılanmıyorsa canlı sistemde kullanıcı şikayeti kaçınılmazdır.</div>
+    </section>
+
+    <section id="uzman-rolu">
+      <h2>4) Performans Testlerinde Test Uzmanının Rolü</h2>
+      <p>Kod yazmadan da büyük değer üretebilirsiniz: doğru senaryo seçimi, doğru metrik takibi, doğru yorumlama. Test uzmanı iş akışını anlar, hangi adımın kritik olduğunu belirler ve gerçek kullanıcı davranışını araca taşır.</p>
+      <p>Örnek katkı: ERP finans modülünde ay sonu kapanış işleminin, normal güne kıyasla farklı yük profili taşıdığını tespit edip ayrı test senaryosu tanımlamak.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Doğru kurgulanmış senaryo, geliştirici ve altyapı ekiplerine doğrudan aksiyon aldıran somut veri üretir.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece araç ekranına odaklanıp iş süreç bağlamını kaçırmak, testin temsil gücünü düşürür.</div>
+    </section>
+
+    <section id="modul-secim">
+      <h2>5) Test Edilecek Uygulama ve Modüllerin Belirlenmesi</h2>
+      <p>Önceliklendirme kuralı: yüksek işlem hacmi + iş açısından kritik + pik saatte yoğun kullanılan modüller önce test edilir.</p>
+      <ol class="steps">
+        <li>İş birimleriyle görüşün: "Hangi ekran/işlem yavaş olursa iş durur?"</li>
+        <li>Geçmiş olay kayıtlarına bakın: sık timeout veren endpoint veya ekranları toplayın.</li>
+        <li>Modül bazlı yük profili çıkarın: stok, finans, satınalma, entegrasyon gibi.</li>
+      </ol>
+      <div class="box"><strong>Neden Önemli?</strong><br>Kaynağı en çok etkileyen işlemlere odaklanmak test maliyetini düşürür, etkiyi artırır.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Az kullanılan bir ekranı uzun test edip kritik API'yi test dışı bırakmak yanlış kapasite kararı doğurur.</div>
+    </section>
+
+    <section id="ortam">
+      <h2>6) Test Ortamının Belirlenmesi</h2>
+      <p>Test ortamı üretime ne kadar benzerse sonuçların güvenilirliği o kadar artar. Donanım boyutu, veritabanı sürümü, ağ gecikmesi ve entegrasyon bağımlılıkları kayıt altına alınmalıdır.</p>
+      <p>ERP/middleware tarafında özellikle kuyruk yöneticisi, API gateway, kimlik doğrulama servisi gibi katmanların dahil edilip edilmediği netleştirilmelidir.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Gerçek dışı küçük ortamda iyi görünen sonuçlar, canlıda çökme riski yaratır.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Paylaşımlı test ortamında başka ekiplerin yükü ölçümü kirletir; test penceresi izolasyonu planlanmalıdır.</div>
+    </section>
+
+    <section id="senaryo">
+      <h2>7) Test Senaryolarının Oluşturulması</h2>
+      <p>Senaryo, kullanıcının gerçek iş adımlarının sırasıdır. Sadece login çağrısı yapmak yerine "giriş → arama → kayıt açma → onaylama → rapor görüntüleme" gibi uçtan uca akışlar kurulmalıdır.</p>
+      <ol class="steps">
+        <li>Kritik iş akışını süreç sahiplerinden doğrulayın.</li>
+        <li>Her akış için beklenen kullanıcı oranını belirleyin (ör. %40 sorgu, %35 kayıt, %25 rapor).</li>
+        <li>Test verilerini gerçekçi dağıtın (farklı müşteri, tarih, ürün, depo vb.).</li>
+      </ol>
+      <div class="box"><strong>Neden Önemli?</strong><br>Gerçek davranışa yakın model, darboğazın doğru katmanda görünmesini sağlar.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tek endpoint'i aşırı döndürmek, gerçek hayatta hiç görülmeyen yapay hotspot üretir.</div>
+    </section>
+
+    <section id="kriterler">
+      <h2>8) Kullanıcı Sayısı, Test Süresi ve Başarı Kriterleri</h2>
+      <p>Başarı kriterleri test başlamadan yazılı olmalıdır. Örnek kriter: 300 eşzamanlı kullanıcıda 95. persentil yanıt süresi 2.5 saniyeyi aşmayacak, hata oranı %1 altında kalacak.</p>
+      <p>Test süresi kısa tutulursa ısınma etkisi, bağlantı havuzu davranışı, uzun süreli bellek tüketimi gibi etkiler kaçabilir.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Önceden tanımlı kriter, sonuç yorumunu tartışmadan ölçülebilir hale getirir.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>"Bakalım ne çıkacak" yaklaşımı test sonunda ortak karar almayı zorlaştırır.</div>
+    </section>
+
+    <section id="ui-api">
+      <h2>9) UI ve API Testlerinin Ayrıştırılması</h2>
+      <p>UI testleri kullanıcı deneyimini, tarayıcı etkisini ve ön yüz render maliyetini içerir. API testleri backend kapasitesini daha net ölçer. ERP'de çoğu kapasite kararı API seviyesinden çıkar; UI testleri doğrulama amacıyla daha az oranda eklenir.</p>
+      <p>Örnek karar: Satınalma ekranı yavaşsa önce aynı işlemin API çağrısı test edilir. API hızlı ama ekran yavaşsa sorun UI katmanında aranır.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Doğru katmanda test yapmak, ekiplerin aksiyon süresini ciddi kısaltır.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tüm testleri sadece UI'dan yürütmek; kök nedeni backend/UI ayrımında bulanıklaştırır.</div>
+    </section>
+
+    <section id="teknoloji-tip">
+      <h2>10) Uygulama/Teknoloji Tiplerinin Tanınması</h2>
+      <ul>
+        <li><strong>Web Uygulaması:</strong> Tarayıcı + API + veritabanı zinciri.</li>
+        <li><strong>REST API:</strong> Mobil, web ve diğer sistemlerin çağırdığı servis katmanı.</li>
+        <li><strong>Mobil + Backend:</strong> Mobil istemci farklı ağ koşullarına sahip olduğundan API stabilitesi kritik.</li>
+        <li><strong>ERP Uygulamaları:</strong> Modül bazlı farklı işlem ağırlıkları (finans CPU, raporlama I/O vb.).</li>
+        <li><strong>Middleware:</strong> Kuyruk, dönüşüm, yönlendirme; gecikme zincirleme etkiler yaratır.</li>
+        <li><strong>Masaüstü Uygulamalar:</strong> Uygulama içinden dışa açık sandbox API'ler üzerinden performans ölçümü yapılabilir.</li>
+      </ul>
+      <div class="box"><strong>Neden Önemli?</strong><br>Teknoloji tipini bilmek doğru ölçüm noktasını seçtirir.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Masaüstü uygulamayı yalnızca ekran etkileşimiyle test etmek, backend darboğazını görünmez bırakır.</div>
+    </section>
+
+    <section id="stack-fark">
+      <h2>11) Java/.NET/Node.js/Python Tabanlı Sistemlerde Yaklaşım Farkı</h2>
+      <p><strong>Java:</strong> Heap yönetimi ve GC davranışı izlenir. Uzun testlerde bellek paterni önemlidir.</p>
+      <p><strong>.NET:</strong> Thread pool ve GC basıncı takip edilir. Ani yükte kuyruk büyümesi gözlenebilir.</p>
+      <p><strong>Node.js:</strong> Olay döngüsü tek iş parçacığı yapısından dolayı bloklayıcı işlemlere duyarlıdır.</p>
+      <p><strong>Python:</strong> Çalışma modeli ve servis mimarisi (senkron/asenkron) throughput sınırını etkileyebilir.</p>
+      <div class="box"><strong>Neden Önemli?</strong><br>Kod yazmasanız da teknolojiye göre hangi metriğe bakacağınızı bilmek yorum kalitesini yükseltir.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Her teknolojiye aynı eşiklerle yaklaşmak, yanlış karşılaştırmalara neden olur.</div>
+    </section>
+
+    <section id="oz-degerlendirme">
+      <h2>12) Kısa Öz Değerlendirme / Düşündürme Soruları</h2>
+      <ol>
+        <li>Çalıştığınız sistemde en kritik 3 işlem hangileri ve neden?</li>
+        <li>Yoğun saatlerde hangi modülün daha fazla kaynak tükettiğini biliyor musunuz?</li>
+        <li>API ve UI tarafında ayrı başarı kriteriniz var mı?</li>
+        <li>Hangi metrikte alarm üretildiğinde iş etkisi en yüksek olur?</li>
+        <li>Son 6 ayda yaşanan performans olaylarının ortak deseni neydi?</li>
+      </ol>
+      <div class="box"><strong>Neden Önemli?</strong><br>Teknoloji yığınınızı ve risk noktalarınızı netleştirmek, sonraki modüllerdeki örnekleri kendi ortamınıza uyarlamanızı kolaylaştırır.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>"Bizde sorun yok" varsayımıyla ilerlemek, test kapsamını gereğinden dar tutar.</div>
+    </section>
+
+    <section id="kurulum">
+      <h2>13) Araç Kurulumları (Windows / macOS / Linux)</h2>
+      <p>Tüm kurulumlarda ilke aynı: indir, kur, sürüm doğrula, eğitimdeki kullanım amacını netleştir.</p>
+
+      <h3>13.1 Java JDK</h3>
+      <p>İndirme: https://www.oracle.com/java/technologies/downloads/</p>
+      <p>JMeter Java olmadan çalışmaz. Bu nedenle önce JDK kurulur, sonra JAVA_HOME ayarlanır.</p>
+      <div class="os-grid">
+        <div class="os-card">
+          <h4>Windows</h4>
+          <ol>
+            <li>Oracle sitesinden Windows x64 installer dosyasını indirin.</li>
+            <li>Kurulum sihirbazında varsayılan adımlarla devam edin.</li>
+            <li>Denetim Masası → Sistem → Gelişmiş sistem ayarları → Ortam Değişkenleri.</li>
+            <li>Yeni sistem değişkeni: Ad = JAVA_HOME, Değer = JDK klasör yolu.</li>
+            <li>Path içine %JAVA_HOME%\bin ekleyin.</li>
+          </ol>
+        </div>
+        <div class="os-card">
+          <h4>macOS</h4>
+          <ol>
+            <li>Oracle pkg dosyasını indirip kurun.</li>
+            <li>Terminalde kabuk dosyasına JAVA_HOME ekleyin (zsh için .zshrc).</li>
+          </ol>
+          <div class="copy-block"><pre>echo 'export JAVA_HOME=$(/usr/libexec/java_home)' >> ~/.zshrc
+echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc</pre></div>
+        </div>
+        <div class="os-card">
+          <h4>Linux (Ubuntu örneği)</h4>
+          <ol>
+            <li>JDK paketini kurun.</li>
+            <li>JAVA_HOME değişkenini profile ekleyin.</li>
+          </ol>
+          <div class="copy-block"><pre>sudo apt update
+sudo apt install -y openjdk-17-jdk
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
+echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc</pre></div>
+        </div>
+      </div>
+      <div class="copy-block"><pre>java -version</pre></div>
+      <p>Beklenen: sürüm bilgisi görünmeli. "command not found" görüyorsanız PATH/JAVA_HOME kontrol edilmelidir.</p>
+
+      <h3>13.2 Apache JMeter</h3>
+      <p>İndirme: https://jmeter.apache.org/download_jmeter.cgi</p>
+      <ol>
+        <li>Binary zip/tgz paketini indirin ve bir klasöre açın.</li>
+        <li>JMeter başlatın: Windows'ta jmeter.bat, macOS/Linux'ta jmeter scripti.</li>
+      </ol>
+      <div class="copy-block"><pre># macOS/Linux
+cd /opt/apache-jmeter-5.6.3/bin
+./jmeter</pre></div>
+      <p>Arayüz açıldığında kurulum tamamdır. Eğitimde senaryo hazırlama, yürütme ve raporlama için ana araçtır.</p>
+
+      <h3>13.3 JMeter Plugins Manager</h3>
+      <p>İndirme: https://jmeter-plugins.org/install/Install/</p>
+      <ol>
+        <li>sitesinden verilen <strong>PluginsManager.jar</strong> dosyasını indirin.</li>
+        <li>Dosyayı JMeter klasöründe <strong>lib/ext</strong> içine kopyalayın.</li>
+        <li>JMeter açıksa kapatıp yeniden başlatın.</li>
+        <li>JMeter üst menüde <strong>Options → Plugins Manager</strong> görünmelidir.</li>
+      </ol>
+      <div class="box"><strong>Neden Önemli?</strong><br>Ek listener ve gelişmiş bileşenleri güvenli şekilde yüklemenizi sağlar.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Jar dosyasını yanlış klasöre koymak veya JMeter'ı yeniden başlatmamak menünün görünmemesine neden olur.</div>
+
+      <h3>13.4 Postman</h3>
+      <p>İndirme: https://www.postman.com/downloads/</p>
+      <p>Kurulumdan sonra API çağrılarını doğrular, ardından JMeter'a taşırsınız.</p>
+      <ol>
+        <li>Postman'i açın → <strong>New</strong> → <strong>HTTP Request</strong>.</li>
+        <li>Method ve URL girin, gerekirse <strong>Authorization</strong> sekmesinden token tanımlayın.</li>
+        <li>İstek başarılıysa <strong>Code</strong> butonundan cURL formatında export edin.</li>
+      </ol>
+
+      <h3>13.5 Git</h3>
+      <p>İndirme: https://git-scm.com/downloads</p>
+      <p>Bu eğitimde amaç kod geliştirme değil, JMeter .jmx dosyalarını ve test raporlarını ekip içinde versiyonlu paylaşmaktır.</p>
+      <div class="copy-block"><pre>git clone https://ornek-sirket/perf-test-repo.git
+cd perf-test-repo
+git add .
+git commit -m "Yeni yük testi senaryosu ve sonuçlar"
+git push</pre></div>
+      <p>Yorum: clone ile depo alınır, add ile dosyalar hazırlanır, commit değişiklik kaydıdır, push merkezi depoya gönderir.</p>
+
+      <h3>13.6 Docker Desktop</h3>
+      <p>İndirme: https://www.docker.com/products/docker-desktop/</p>
+      <p>InfluxDB ve Grafana'yı lokal ortamda hızlı ayağa kaldırmak için kullanılır.</p>
+      <div class="copy-block"><pre>docker --version
+docker compose version</pre></div>
+      <p>Doğrulama sonrası proje klasöründe docker-compose dosyası oluşturun:</p>
+      <div class="copy-block"><pre>version: "3.8"
+services:
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=jmeter
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb</pre></div>
+      <div class="copy-block"><pre>docker compose up -d
+docker ps</pre></div>
+      <p>Tarayıcı erişimi: Grafana için http://localhost:3000, InfluxDB API için http://localhost:8086</p>
+
+      <h3>13.7 InfluxDB</h3>
+      <p>İndirme: https://www.influxdata.com/downloads/</p>
+      <p>Performans metriklerini zaman serisi olarak saklar. JMeter verileri burada tutulur.</p>
+      <div class="copy-block"><pre>curl -I http://localhost:8086/ping</pre></div>
+
+      <h3>13.8 Grafana</h3>
+      <p>İndirme: https://grafana.com/grafana/download/</p>
+      <p>Kurulum sonrası ilk girişte admin hesabı oluşturun. Ardından data source tanımlayın:</p>
+      <ol>
+        <li>Sol menüden <strong>Connections</strong> → <strong>Data sources</strong> → <strong>Add data source</strong>.</li>
+        <li><strong>InfluxDB</strong> seçin.</li>
+        <li>URL alanına <strong>http://influxdb:8086</strong> (Docker ağı) veya <strong>http://localhost:8086</strong> yazın.</li>
+        <li>Database alanına <strong>jmeter</strong> girin.</li>
+        <li><strong>Save & Test</strong> ile doğrulayın.</li>
+      </ol>
+
+      <h3>13.9 Dynatrace</h3>
+      <p>Bilgi ve erişim: https://www.dynatrace.com/</p>
+      <p>OneAgent kurulumu çoğu kurumda altyapı/geliştirici ekip koordinasyonu gerektirir.</p>
+      <ol>
+        <li>Dynatrace tenant'a giriş yapın.</li>
+        <li><strong>Deploy Dynatrace</strong> bölümünden hedef OS'e uygun OneAgent komutunu alın.</li>
+        <li>Sunucuda komutu çalıştırın, servis yeniden başlatma gereksinimini teyit edin.</li>
+        <li>Dynatrace arayüzünde host ve process görünürlüğünü doğrulayın.</li>
+      </ol>
+      <div class="box"><strong>Neden Koordinasyon Gerekir?</strong><br>Ajan kurulumu güvenlik politikaları, değişiklik yönetimi ve bakım penceresi gerektirebilir.</div>
+
+      <h3>13.10 JMeter GUI ve Non-GUI Mod Farkı</h3>
+      <p>Senaryo hazırlığı GUI ile kolaydır; gerçek yük koşumu ise non-GUI modda yapılmalıdır. Çünkü GUI render maliyeti JMeter'ın kendi kaynak tüketimini artırır, sonuçları çarpıtabilir.</p>
+      <div class="copy-block"><pre>jmeter -n -t test.jmx -l sonuc.jtl</pre></div>
+      <p>Açıklama: <strong>-n</strong> non-GUI, <strong>-t</strong> test planı dosyası, <strong>-l</strong> sonuç dosyasıdır.</p>
+
+      <h3>13.11 Postman'dan cURL alıp JMeter'a taşıma akışı</h3>
+      <ol>
+        <li>Postman'da doğrulanmış istekte <strong>Code</strong> seçin, cURL kopyalayın.</li>
+        <li>JMeter'da <strong>Thread Group</strong> altında <strong>Add → Sampler → HTTP Request</strong>.</li>
+        <li>cURL içindeki URL, method, header, body bilgilerini ilgili alanlara aktarın.</li>
+        <li><strong>View Results Tree</strong> ile response code ve body kontrol edin.</li>
+      </ol>
+        <h3>13.12 Her Araç İçin İşletim Sistemi Bazlı Uygulama Özeti</h3>
+        <p>Bu bölümde listedeki her araç için Windows, macOS ve Linux adımlarını tek yerde karşılaştırmalı görebilirsiniz. Amaç, katılımcının kendi işletim sisteminde adım kaçırmadan ilerlemesidir.</p>
+
+        <h4>Apache JMeter</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>Zip paketini indirin ve örneğin C:\tools\apache-jmeter klasörüne açın.</li>
+              <li>bin klasöründeki jmeter.bat dosyasını çift tıklayın.</li>
+              <li>Arayüz açılıyorsa kurulum tamamdır.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>tgz paketini indirip bir klasöre açın.</li>
+              <li>Terminal ile bin klasörüne geçip jmeter scriptini çalıştırın.</li>
+            </ol>
+            <div class="copy-block"><pre>cd ~/tools/apache-jmeter-5.6.3/bin
+  ./jmeter</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>tgz paketini açın ve çalıştırma izni verin.</li>
+              <li>bin/jmeter scriptini çalıştırın.</li>
+            </ol>
+            <div class="copy-block"><pre>cd ~/tools/apache-jmeter-5.6.3/bin
+  chmod +x jmeter
+  ./jmeter</pre></div>
+          </div>
+        </div>
+
+        <h4>JMeter Plugins Manager</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>PluginsManager.jar dosyasını indirin.</li>
+              <li>Dosyayı JMeter\lib\ext klasörüne kopyalayın.</li>
+              <li>JMeter'ı kapatıp yeniden açın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>Jar dosyasını indirin.</li>
+              <li>apache-jmeter/lib/ext klasörüne kopyalayın.</li>
+              <li>Uygulamayı yeniden başlatın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Jar dosyasını indirin.</li>
+              <li>lib/ext içine yerleştirin ve JMeter'ı yeniden başlatın.</li>
+            </ol>
+          </div>
+        </div>
+
+        <h4>Postman</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>Installer (.exe) dosyasını indirip çalıştırın.</li>
+              <li>Kurulum sonrası Start menüsünden Postman'i açın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>.zip/.dmg paketini indirip Applications klasörüne taşıyın.</li>
+              <li>Launchpad üzerinden Postman'i başlatın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Tar.gz veya snap paketiyle kurulum yapın.</li>
+              <li>Uygulama menüsünden Postman'i başlatın.</li>
+            </ol>
+            <div class="copy-block"><pre>sudo snap install postman</pre></div>
+          </div>
+        </div>
+
+        <h4>Git</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>Git for Windows installer'ını kurun.</li>
+              <li>Git Bash açıp sürümü doğrulayın.</li>
+            </ol>
+            <div class="copy-block"><pre>git --version</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>git-scm paketini veya Xcode Command Line Tools kurulumunu tamamlayın.</li>
+              <li>Terminalden sürümü kontrol edin.</li>
+            </ol>
+            <div class="copy-block"><pre>git --version</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Paket yöneticisiyle Git kurun.</li>
+              <li>Sürüm doğrulaması yapın.</li>
+            </ol>
+            <div class="copy-block"><pre>sudo apt install -y git
+  git --version</pre></div>
+          </div>
+        </div>
+
+        <h4>Docker Desktop / Docker Engine</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>Docker Desktop installer'ı çalıştırın.</li>
+              <li>WSL2 entegrasyon ayarını etkinleştirin.</li>
+              <li>Docker Desktop açıldığında sürüm doğrulayın.</li>
+            </ol>
+            <div class="copy-block"><pre>docker --version
+  docker compose version</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>Apple Silicon/Intel sürümüne uygun Docker Desktop indirip kurun.</li>
+              <li>Uygulamayı başlatın ve terminal doğrulaması yapın.</li>
+            </ol>
+            <div class="copy-block"><pre>docker --version
+  docker compose version</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Docker Engine ve Docker Compose plugin kurun.</li>
+              <li>Kullanıcı yetkisini ayarlayıp servisi başlatın.</li>
+            </ol>
+            <div class="copy-block"><pre>sudo apt install -y docker.io docker-compose-plugin
+  sudo systemctl enable --now docker
+  docker --version
+  docker compose version</pre></div>
+          </div>
+        </div>
+
+        <h4>InfluxDB</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>MSI paketini veya Docker yöntemini seçin.</li>
+              <li>Servis başlatıldıktan sonra ping endpoint'i kontrol edin.</li>
+            </ol>
+            <div class="copy-block"><pre>curl -I http://localhost:8086/ping</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>Homebrew veya Docker ile kurun.</li>
+              <li>Port 8086 erişimini doğrulayın.</li>
+            </ol>
+            <div class="copy-block"><pre>curl -I http://localhost:8086/ping</pre></div>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Resmi depodan paketi kurun veya Docker ile ayağa kaldırın.</li>
+              <li>Servis durumunu ve ping yanıtını doğrulayın.</li>
+            </ol>
+            <div class="copy-block"><pre>curl -I http://localhost:8086/ping</pre></div>
+          </div>
+        </div>
+
+        <h4>Grafana</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>MSI installer ile kurun, service olarak başlatın.</li>
+              <li>Tarayıcıdan localhost:3000 açın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>Homebrew veya Docker yöntemiyle kurun.</li>
+              <li>localhost:3000 üzerinden giriş yapın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Grafana paketini kurup servisi başlatın.</li>
+              <li>Tarayıcıdan 3000 portunu doğrulayın.</li>
+            </ol>
+            <div class="copy-block"><pre>sudo systemctl enable --now grafana-server</pre></div>
+          </div>
+        </div>
+
+        <h4>Dynatrace OneAgent</h4>
+        <div class="os-grid">
+          <div class="os-card">
+            <h5>Windows</h5>
+            <ol>
+              <li>Dynatrace tenant'tan Windows OneAgent installer indirin.</li>
+              <li>Yönetici yetkisiyle çalıştırın, hedef host tag bilgisi girin.</li>
+              <li>Host görünürlüğünü Dynatrace arayüzünde doğrulayın.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>macOS</h5>
+            <ol>
+              <li>macOS kurulum paketini tenant'tan alın.</li>
+              <li>Kurulum komutunu terminalde çalıştırın.</li>
+              <li>Dynatrace içinde process görünürlüğünü kontrol edin.</li>
+            </ol>
+          </div>
+          <div class="os-card">
+            <h5>Linux</h5>
+            <ol>
+              <li>Tenant'ın verdiği shell komutunu sunucuda çalıştırın.</li>
+              <li>Kurulum sonrası servis/agent durumunu doğrulayın.</li>
+              <li>Güvenlik ve değişiklik yönetimi onaylarını kayıt altına alın.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="box"><strong>Neden Önemli?</strong><br>Her aracın işletim sistemine göre küçük farkları vardır; bu farklar adım atlamayı ve yanlış kurulum riskini azaltmak için net yazılmalıdır.</div>
+        <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Kurulumun sadece bir işletim sistemi örneğine bakılarak yapılması, ekip içinde tekrar edilemeyen sonuçlara neden olur.</div>
+    </section>
+
+    <section id="guvenlik-port">
+      <h2>14) Güvenlik Duvarı ve Port Gereksinimleri</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Bileşen</th><th>Varsayılan Port</th><th>Erişim Gereksinimi</th><th>Yorum</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Grafana</td><td>3000</td><td>Tarayıcıdan Grafana erişimi</td><td>Dashboard görüntüleme ve yönetim</td></tr>
+            <tr><td>InfluxDB</td><td>8086</td><td>JMeter/Grafana'nın InfluxDB'ye erişimi</td><td>Metrik yazma ve sorgulama</td></tr>
+            <tr><td>Hedef Uygulama API</td><td>80/443 veya kurum portu</td><td>JMeter yük üreticiden hedefe çıkış</td><td>Firewall çıkış kuralı kritik</td></tr>
+            <tr><td>Dynatrace iletişim</td><td>Kurum politikasına göre</td><td>OneAgent'in tenant ile haberleşmesi</td><td>Güvenlik ekibiyle teyit edilir</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box"><strong>Neden Önemli?</strong><br>Port erişimi kapalıysa sorun performans değil bağlantıdır; yanlış teşhis riski doğar.</div>
+      <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Test öncesi ağ doğrulaması yapılmazsa ilk koşuda toplu timeout görülür ve zaman kaybı yaşanır.</div>
+    </section>
+
+    <section id="ozet">
+      <h2>Modül Özeti</h2>
+      <p>Bu modülde performans testinin temel dilini, test uzmanının değer üretim alanını ve eğitimde kullanılacak tüm araçların kurulum/doğrulama adımlarını tamamladık.</p>
+      <h3>Bu Modülde Öğrendikleriniz</h3>
+      <ul>
+        <li>Performans, yük, stress, spike ve soak test ayrımları</li>
+        <li>UI ve API test ayrıştırması ve ERP/middleware bağlamı</li>
+        <li>JDK/JMeter/Plugin/Postman/Git/Docker/InfluxDB/Grafana/Dynatrace kurulumları</li>
+        <li>JAVA_HOME ayarı, JMeter non-GUI çalıştırma ve docker-compose ile izleme altyapısı</li>
+        <li>Port/firewall gereksinimleri ve test öncesi bağlantı doğrulama yaklaşımı</li>
+      </ul>
+    </section>
+
+    <div class="nav">
+      <a href="#">⟵ Önceki Konu</a>
+      <a href="2. Performans Test Metrikleri.html">Sonraki Konu ⟶</a>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.copy-block').forEach(function(block) {
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Kopyala';
+      btn.addEventListener('click', function() {
+        var text = block.querySelector('pre').innerText;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Kopyalandı';
+          setTimeout(function() { btn.textContent = 'Kopyala'; }, 1400);
+        });
+      });
+      block.insertBefore(btn, block.firstChild);
+    });
+  </script>
+</body>
+</html>

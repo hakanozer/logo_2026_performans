@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modül 5 - JMeter Test Sonuçlarının Okunması ve Yorumlanması</title>
+<style>
+:root{--card:#fff;--ink:#1f2937;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+.wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+h1,h2{color:var(--brand)}h1{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 8px}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}
+.box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+.copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+.copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="card"><h1>Modül 5: JMeter Test Sonuçlarının Okunması ve Yorumlanması</h1><p>Bu modülde JMeter raporlarını adım adım okuyup, performans problemlerini kaynak sinyalleriyle birlikte yorumlayacaksınız.</p></section>
+
+<nav class="card toc"><h2>İçindekiler / Bölüm Haritası</h2><ul>
+<li><a href="#summary">Summary Report ve Aggregate Report</a></li>
+<li><a href="#metrik">Raporlarda Metriklerin Konumu ve Yorumu</a></li>
+<li><a href="#grafik">Grafiklerin Okunması</a></li>
+<li><a href="#problem">Yavaş Transaction/Endpoint Tespiti</a></li>
+<li><a href="#cpu-mem">CPU/Memory ile İlişkilendirme</a></li>
+<li><a href="#db-net">Database ve Network Problemlerini Ayırma</a></li>
+<li><a href="#bottleneck">Bottleneck Kavramı</a></li>
+<li><a href="#ozet">Modül Özeti</a></li>
+</ul></nav>
+
+<section class="card" id="summary">
+<h2>1) Summary Report ve Aggregate Report Nasıl Okunur?</h2>
+<p>Summary Report hızlı durum resmi verir; Aggregate Report ise percentile ve istatistikleri daha detaylı okumaya uygundur. İlk değerlendirmede Summary ile genel tabloyu, ardından Aggregate ile dağılımı kontrol edin.</p>
+<ol>
+<li>JMeter'da Listener ekleyin: <strong>Add → Listener → Summary Report</strong>.</li>
+<li>Ayrıca <strong>Aggregate Report</strong> ekleyin.</li>
+<li>Test sonrası iki raporu yan yana değerlendirin.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Tek rapora bakmak, sorunun yayılımını kaçırabilir; iki rapor birlikte daha güvenli yorum sağlar.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Çok fazla listener açık bırakmak JMeter tarafında ek yük yaratır.</div>
+</section>
+
+<section class="card" id="metrik">
+<h2>2) Response Time, Throughput, Error Rate, Percentile Nerede ve Nasıl Yorumlanır?</h2>
+<p>Aggregate Report içinde ortalama, min, max, 90/95/99 percentile kolonlarını takip edin. Throughput ve error yüzdesi aynı ekranın alt bölümlerinde görünür.</p>
+<div class="copy-block"><pre>Örnek yorumlama akışı
+Adım 1: 95th percentile hedefin altında mı?
+Adım 2: Throughput kullanıcı artışıyla büyümüş mü?
+Adım 3: Error %1 üstüne çıkmış mı?
+Adım 4: En yavaş endpoint hangisi?</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>KPI odaklı yorum yaparsanız iş birimlerine net, karşılaştırılabilir sonuç sunarsınız.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Status code 200 olsa bile iş sonucu hatalı dönebileceği için assertion sonuçları da kontrol edilmelidir.</div>
+</section>
+
+<section class="card" id="grafik">
+<h2>3) Grafiklerin Okunması: Response Time, Throughput, Active Users, Error</h2>
+<p>Grafik okuma sırası önerisi: Active Users ile yük profilini teyit et, Response Time eğrisini izle, Throughput'un plato yaptığı anı bul, Error yükselişini aynı zaman çizgisinde işaretle.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>Zaman ekseninde birlikte okuma, kırılma anını yakalayıp kök neden analizini hızlandırır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Grafikleri farklı zaman diliminde okumak yanlış ilişki kurdurur.</div>
+</section>
+
+<section class="card" id="problem">
+<h2>4) Performans Problemlerinin Belirlenmesi</h2>
+<p>Önce en yüksek gecikmeye sahip transaction/endpoint'i bulun, ardından hata artışının aynı endpoint'te mi yoksa farklı bir çağrıda mı olduğunu kontrol edin.</p>
+<ol>
+<li>Aggregate Report'ta en yüksek 95th değere sahip satırları sıralayın.</li>
+<li>Error yüzdesi artan endpoint'leri listeleyin.</li>
+<li>Bu endpoint'ler için log ve APM ekranlarını açın.</li>
+</ol>
+<div class="box"><strong>Neden Önemli?</strong><br>Genel ortalama yerine işlem bazlı hedefleme, iyileştirme maliyetini düşürür.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tüm sistemi optimize etmeye çalışmak yerine problemli 1-2 kritik akışa odaklanılmalıdır.</div>
+</section>
+
+<section class="card" id="cpu-mem">
+<h2>5) CPU/Memory Kullanımı ile Sonuçları İlişkilendirme</h2>
+<p>Response time artışıyla aynı dakika içinde CPU %90+ veya memory sürekli yükseliyorsa uygulama katmanında baskı olabilir. Memory artışı test sonuna kadar geri düşmüyorsa sızıntı adaydır.</p>
+<div class="copy-block"><pre>Örnek bulgu
+11:20 sonrası response time artıyor
+CPU: %65 -> %92
+Memory: 7.2 GB -> 9.8 GB
+Yorum: Uygulama katmanında işlem yoğunluğu ve olası memory baskısı</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Kaynak sinyali olmadan yalnız JMeter verisiyle kök neden çıkarmak risklidir.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>OS seviyesinde ortalama CPU'ya bakıp process bazlı tüketimi incelememek.</div>
+</section>
+
+<section class="card" id="db-net">
+<h2>6) Database ve Network Kaynaklı Problemleri Ayırt Etme</h2>
+<p>DB kaynaklı sorunlarda query süresi, lock bekleme ve connection pool doluluğu yükselir. Network kaynaklı sorunlarda timeout, yeniden deneme ve dalgalı gecikme deseni öne çıkar.</p>
+<div class="copy-block"><pre>Ayırt etme kontrol listesi
+- DB pool %100 mü?
+- Uzun çalışan sorgu arttı mı?
+- Ağ gecikmesi aynı anda sıçradı mı?
+- Paket kaybı/yeniden deneme var mı?</pre></div>
+<div class="box"><strong>Neden Önemli?</strong><br>Yanlış ekipte çözüm aramak, olay çözüm süresini uzatır.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Her yavaşlıkta veritabanını suçlamak; bazen dış servis veya ağ katmanı temel etkendir.</div>
+</section>
+
+<section class="card" id="bottleneck">
+<h2>7) Bottleneck Kavramı ve Somut Örnek</h2>
+<p>Bottleneck, sistemin toplam kapasitesini sınırlayan en dar noktadır. Örneğin API katmanı saniyede 400 istek işleyebilse de DB bağlantı havuzu 120 bağlantı ile sınırlıysa kapasite bu noktada sıkışır.</p>
+<p>ERP örneği: Stok sorguları hızla artarken cache dışı kalan sorgular DB'yi kilitliyor, response time ve error rate aynı anda artıyor. Burada darboğaz DB katmanıdır.</p>
+<div class="box"><strong>Neden Önemli?</strong><br>Doğru darboğaz tespiti, doğru yatırım kararını sağlar.</div>
+<div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Darboğazı görmeden sadece sunucu sayısını artırmak maliyeti yükseltir ama sorunu çözmeyebilir.</div>
+</section>
+
+<section class="card" id="ozet">
+<h2>Modül Özeti</h2>
+<p>Bu modülde JMeter sonuçlarını tablo ve grafik düzeyinde yorumlayıp kaynak metrikleriyle ilişkilendirerek darboğaz bulma yöntemini öğrendiniz.</p>
+<h3>Bu Modülde Öğrendikleriniz</h3>
+<ul>
+<li>Summary ve Aggregate raporların birlikte kullanımı</li>
+<li>Percentile, throughput, error rate odaklı yorumlama disiplini</li>
+<li>Yavaş endpoint tespiti ve işlem bazlı analiz</li>
+<li>CPU/memory/DB/network metrikleriyle korelasyon</li>
+<li>Bottleneck kavramının kurumsal örneklerle uygulanması</li>
+</ul>
+</section>
+
+<div class="nav"><a href="4. Yük Testi Senaryolarının Oluşturulması.html">⟵ Önceki Konu</a><a href="6. InfluxDB ve Grafana ile Performans İzleme.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});</script>
+</body>
+</html>

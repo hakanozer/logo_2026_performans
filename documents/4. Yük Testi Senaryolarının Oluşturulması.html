@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modül 4 - Yük Testi Senaryolarının Oluşturulması</title>
+  <style>
+    :root{--bg:#f5f8fc;--card:#fff;--ink:#1f2937;--muted:#607086;--brand:#0b3a67;--accent:#0e7490;--warn:#fff7ed;--ok:#ecfeff;--border:#d9e2ec}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef4ff,#f8fafc,#edf7f8);font-family:"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);line-height:1.65}
+    .wrap{max-width:1120px;margin:auto;padding:24px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+    h1,h2{color:var(--brand)}h1{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 8px}.toc ul{column-count:2;padding-left:18px}.toc a{color:var(--brand);text-decoration:none}
+    .box{background:var(--ok);border-left:5px solid var(--accent);border-radius:10px;padding:12px;margin:10px 0}.warn{background:var(--warn);border-left-color:#d97706}
+    .copy-block{position:relative;border:1px solid #cbd5e1;border-radius:10px;overflow:auto;background:#0f172a;margin:10px 0}.copy-block pre{margin:0;padding:14px;color:#e2e8f0;min-width:520px}
+    .copy-btn{position:sticky;left:calc(100% - 98px);top:8px;margin:8px;float:right;border:0;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+    .table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{background:#eef2f7}
+    .nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.nav a{text-decoration:none;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+    @media(max-width:800px){.toc ul{column-count:1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card"><h1>Modül 4: Yük Testi Senaryolarının Oluşturulması</h1><p>Bu modülde gerçek kullanıcı davranışını sanal kullanıcı modeline çevirmeyi, test türü seçim kararını ve ERP/middleware için senaryo stratejisini öğreneceksiniz.</p></section>
+
+  <nav class="card toc">
+    <h2>İçindekiler / Bölüm Haritası</h2>
+    <ul>
+      <li><a href="#vu">Virtual User ve Concurrent User</a></li>
+      <li><a href="#load">Normal Load, Peak Load, Ramp-up, Ramp-down</a></li>
+      <li><a href="#turler">Load, Stress, Spike, Soak, Capacity Test</a></li>
+      <li><a href="#uiapi">UI ve API Performans Testi Farkları</a></li>
+      <li><a href="#mobil">Mobil Uygulamalarda Backend/API Performans Testi</a></li>
+      <li><a href="#desktop">Masaüstü Uygulamalarda Sandbox API Senaryosu</a></li>
+      <li><a href="#ozet">Modül Özeti</a></li>
+    </ul>
+  </nav>
+
+  <section class="card" id="vu">
+    <h2>1) Virtual User ve Gerçek Kullanıcı Kavramı</h2>
+    <p>Virtual User, JMeter içindeki sanal kullanıcıdır. Gerçek kullanıcı ise iş akışında düşünen, bekleyen, farklı adımlara giden kişidir. Bu nedenle virtual user sayısı tek başına yeterli değildir; kullanıcı davranış oranları da modellenmelidir.</p>
+    <p>Concurrent User, aynı anda aktif işlem yapan kullanıcı sayısıdır. Toplam günlük kullanıcı ile concurrent user farklıdır.</p>
+    <div class="box"><strong>Neden Önemli?</strong><br>Doğru concurrent model kurmadan yapılan test, canlı trafiği temsil etmez.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>"1000 kayıtlı kullanıcı var, testte de 1000 thread açalım" yaklaşımı çoğu zaman gerçek dışıdır.</div>
+  </section>
+
+  <section class="card" id="load">
+    <h2>2) Normal Load, Peak Load, Ramp-up ve Ramp-down</h2>
+    <ul>
+      <li><strong>Normal Load:</strong> Günlük ortalama kullanım düzeyi.</li>
+      <li><strong>Peak Load:</strong> Ay sonu, kampanya, vardiya değişimi gibi yoğun zaman.</li>
+      <li><strong>Ramp-up:</strong> Kullanıcıların sisteme kademeli giriş süresi.</li>
+      <li><strong>Ramp-down:</strong> Yükün kademeli azaltılması.</li>
+    </ul>
+    <div class="copy-block"><pre>Örnek model
+0-5 dk: 50 kullanıcı
+5-10 dk: 150 kullanıcı
+10-20 dk: 300 kullanıcı (peak)
+20-25 dk: 150 kullanıcı
+25-30 dk: 50 kullanıcı</pre></div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Kademeli yük modeli, sistemin geçiş davranışını ve toparlanma kabiliyetini gösterir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tek adımda yüksek yüke çıkmak, gerçek kullanıcı giriş dinamiğini bozarak aşırı stres yaratır.</div>
+  </section>
+
+  <section class="card" id="turler">
+    <h2>3) Test Türleri ve ERP/Middleware Senaryoları</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Test Türü</th><th>Ne Ölçer?</th><th>ERP/Middleware Senaryosu</th></tr></thead>
+        <tbody>
+          <tr><td>Load Test</td><td>Beklenen yükte kararlılık</td><td>ERP sipariş girişinde 250 eşzamanlı kullanıcı</td></tr>
+          <tr><td>Stress Test</td><td>Sınır aşımında kırılma noktası</td><td>Entegrasyon katmanında normalin 2.5 katı mesaj trafiği</td></tr>
+          <tr><td>Spike Test</td><td>Ani yük artışına tepki</td><td>Kampanya başlangıcında 1 dakikada 50'den 500 kullanıcıya çıkış</td></tr>
+          <tr><td>Soak Test</td><td>Uzun süreli dayanıklılık</td><td>Gece 8 saat toplu mutabakat ve raporlama yükü</td></tr>
+          <tr><td>Capacity Test</td><td>Güvenli üst kapasite</td><td>Hangi kullanıcı seviyesinde SLA bozuluyor sorusunun yanıtı</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box"><strong>Neden Önemli?</strong><br>Her test türü farklı iş riskini açığa çıkarır, tek tür test yeterli değildir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Soak test yapmadan canlıya çıkmak, bellek/bağlantı sızıntılarını gizler.</div>
+  </section>
+
+  <section class="card" id="uiapi">
+    <h2>4) UI ve API Performans Testi Farkları ve Donanım Etkisi</h2>
+    <p>UI testleri tarayıcı rendering, istemci gecikmesi ve ön yüz kaynaklarını da içerir. API testleri backend kapasitesini daha saf ölçer. Donanım planlamasında API sonuçları genellikle daha belirleyicidir.</p>
+    <p>Karar kuralı: Hangi modül hangi testten geçecek?</p>
+    <ul>
+      <li>Yüksek işlem hacmi olan veri servisleri: önce API load/stress.</li>
+      <li>Kullanıcı deneyimi kritik ekranlar: API sonrası hedefli UI doğrulama.</li>
+      <li>Raporlama modülleri: API + DB I/O ağırlıklı senaryo.</li>
+    </ul>
+    <div class="box"><strong>Neden Önemli?</strong><br>Doğru test katmanı seçimi, gereksiz donanım maliyetini ve yanlış darboğaz yorumunu azaltır.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Tüm modülleri aynı test tipiyle sınamak, modülün gerçek riskini maskeleyebilir.</div>
+  </section>
+
+  <section class="card" id="mobil">
+    <h2>5) Mobil Uygulamalarda Backend/API Performans Testi</h2>
+    <p>Mobil istemci ağ koşulları farklılaşsa da kapasite darboğazı çoğunlukla backend API katmanında oluşur. Bu nedenle mobil performans testi, API tarafında kullanıcı davranışını oranlayarak yapılmalıdır.</p>
+    <ol>
+      <li>Mobilde en çok kullanılan işlem setini belirleyin (listeleme, detay, kaydetme).</li>
+      <li>Çağrı sıklıklarını yüzdesel modele dönüştürün.</li>
+      <li>JMeter'da ayrı Thread Group ile mobil trafik desenini üretin.</li>
+    </ol>
+    <div class="box"><strong>Neden Önemli?</strong><br>Mobil kanal yükü düşük görünse bile sık tekrarlanan kısa çağrılar backend'i yorabilir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sadece Wi-Fi koşuluna göre test yapmak, gerçek 4.5G gecikme etkilerini gözden kaçırır.</div>
+  </section>
+
+  <section class="card" id="desktop">
+    <h2>6) Masaüstü Uygulamalarda API Tabanlı Performans Testi (Sandbox Örneği)</h2>
+    <p>Masaüstü uygulamalarda doğrudan UI otomasyonuyla yüksek yük üretmek zor olabilir. Eğer ürünün dışa açık sandbox API katmanı varsa, aynı iş adımları API düzeyinde modellenerek performans testi yapılır.</p>
+    <ol>
+      <li>Geliştirici ekipten sandbox endpoint listesini alın.</li>
+      <li>İş akışını API çağrı sırasına çevirin.</li>
+      <li>JMeter'da bu akışı parametreli senaryoya dönüştürün.</li>
+    </ol>
+    <div class="box"><strong>Neden Önemli?</strong><br>API tabanı üzerinden kapasite ölçmek, masaüstü kanalın backend etkisini netleştirir.</div>
+    <div class="box warn"><strong>Dikkat / Sık Yapılan Hata</strong><br>Sandbox ile canlı endpoint farklarını dokümante etmeden sonuçları birebir canlı varsaymak.</div>
+  </section>
+
+  <section class="card" id="ozet">
+    <h2>Modül Özeti</h2>
+    <p>Bu modülde doğru kullanıcı modeli kurmayı, test türünü iş riskine göre seçmeyi ve kanal bazlı strateji geliştirmeyi öğrendiniz.</p>
+    <h3>Bu Modülde Öğrendikleriniz</h3>
+    <ul>
+      <li>Virtual user, gerçek kullanıcı ve concurrent user ayrımı</li>
+      <li>Normal/peak yük ile ramp-up/ramp-down modelleme</li>
+      <li>Load, stress, spike, soak, capacity test kullanım alanları</li>
+      <li>UI ve API test kararının donanım beklentisine etkisi</li>
+      <li>Mobil ve masaüstü uygulamalarda API bazlı performans yaklaşımı</li>
+    </ul>
+  </section>
+
+  <div class="nav"><a href="3. Apache JMeter ile Yük Testleri.html">⟵ Önceki Konu</a><a href="5. JMeter Test Sonuçlarının Okunması ve Yorumlanması.html">Sonraki Konu ⟶</a></div>
+</div>
+<script>
+document.querySelectorAll('.copy-block').forEach(function(block){var b=document.createElement('button');b.className='copy-btn';b.textContent='Kopyala';b.onclick=function(){navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function(){b.textContent='Kopyalandı';setTimeout(function(){b.textContent='Kopyala';},1400);});};block.insertBefore(b,block.firstChild);});
+</script>
+</body>
+</html>
