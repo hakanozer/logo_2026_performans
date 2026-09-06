@@ -58,6 +58,9 @@ appsettings.*.Development.json
 # User secrets
 secrets.json
 
+# Local SQLite data
+RestApi/data/
+
 # ==========================================
 # Dynatrace / local secrets
 # ==========================================
