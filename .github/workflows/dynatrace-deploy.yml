@@ -9,6 +9,7 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/restapi
+  DT_API_URL: https://ubs13257.live.dynatrace.com
 
 jobs:
   build-and-deploy:
