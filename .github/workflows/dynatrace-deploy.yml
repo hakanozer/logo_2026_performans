@@ -35,6 +35,75 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore and build telemetry test app
+        run: dotnet build RestApi/RestApi.csproj --configuration Release
+
+      - name: Run API traffic and send telemetry
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ASPNETCORE_URLS: http://127.0.0.1:8080
+          OTEL_SERVICE_NAME: logo-2026-restapi
+          OTEL_EXPORTER_OTLP_ENDPOINT: https://ubs13257.live.dynatrace.com/api/v2/otlp
+          OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+          OTEL_EXPORTER_OTLP_HEADERS: Authorization=Api-Token%20${{ secrets.DT_OTEL_TOKEN }}
+          OTEL_METRIC_EXPORT_INTERVAL: "5000"
+          OTEL_BSP_SCHEDULE_DELAY: "5000"
+        run: |
+          set -euo pipefail
+          dotnet run --project RestApi/RestApi.csproj --configuration Release --no-build \
+            --no-restore --urls http://127.0.0.1:8080 > /tmp/restapi.log 2>&1 &
+          api_pid=$!
+
+          for attempt in {1..30}; do
+            response_code=$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/Product || true)
+            if [ "$response_code" != "000" ]; then
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$response_code" = "000" ]; then
+            cat /tmp/restapi.log
+            kill "$api_pid" || true
+            exit 1
+          fi
+
+          username="dt-${GITHUB_RUN_ID}"
+          password="TelemetryTest123!"
+          curl -sS -f -X POST http://127.0.0.1:8080/api/Auth/register \
+            -H 'Content-Type: application/json' \
+            -d "{\"username\":\"$username\",\"password\":\"$password\",\"role\":\"Product\"}" \
+            -o /tmp/register.json
+
+          login_response=$(curl -sS -f -X POST http://127.0.0.1:8080/api/Auth/login \
+            -H 'Content-Type: application/json' \
+            -d "{\"username\":\"$username\",\"password\":\"$password\"}")
+          token=$(printf '%s' "$login_response" | jq -r '.token // .Token')
+
+          if [ -z "$token" ] || [ "$token" = "null" ]; then
+            cat /tmp/restapi.log
+            kill "$api_pid" || true
+            exit 1
+          fi
+
+          for request_number in {1..30}; do
+            curl -sS -f http://127.0.0.1:8080/api/Product \
+              -H "Authorization: Bearer $token" > /dev/null
+          done
+
+          for request_number in {1..5}; do
+            curl -sS -o /dev/null http://127.0.0.1:8080/api/Product
+          done
+
+          sleep 10
+          kill "$api_pid" || true
+          wait "$api_pid" || true
+
       # Marks a deployment event on the Dynatrace timeline, tied to the GitHub commit.
       # Requires an environment API token with the events.ingest scope.
       - name: Send deployment event to Dynatrace
