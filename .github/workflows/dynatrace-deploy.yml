@@ -36,11 +36,11 @@ jobs:
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       # Marks a deployment event on the Dynatrace timeline, tied to the GitHub commit.
-      # Requires a Dynatrace API token (not the platform token) with the "events.ingest" scope.
+      # Requires an environment API token with the events.ingest scope.
       - name: Send deployment event to Dynatrace
         run: |
           curl -sSf -X POST "${{ env.DT_API_URL }}/api/v2/events/ingest" \
-            -H "Authorization: Api-Token ${{ secrets.DT_API_TOKEN }}" \
+            -H "Authorization: Api-Token ${{ secrets.DT_DEPLOYMENT_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
               "eventType": "CUSTOM_DEPLOYMENT",
