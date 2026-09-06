@@ -64,7 +64,6 @@ RestApi/data/
 # ==========================================
 # Dynatrace / local secrets
 # ==========================================
-.env
 .env.*
 !.env.example
 
@@ -79,10 +78,6 @@ logs/
 # Docker override files
 docker-compose.override.yml
 
-# Docker local environment
-.env
-.env.*
-!.env.example
 
 # ==========================================
 # Operating System
