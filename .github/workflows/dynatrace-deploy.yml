@@ -2,9 +2,10 @@ name: Build & Notify Dynatrace
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - "RestApi/**"
+  workflow_dispatch: {}
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/restapi
