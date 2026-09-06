@@ -1,4 +1,13 @@
 services:
+  restapi:
+    build:
+      context: ./RestApi
+      dockerfile: Dockerfile
+      args:
+        DT_ENVIRONMENT_ID: ${DT_ENVIRONMENT_ID}
+    ports:
+      - "8080:8080"
+
   influxdb:
     image: influxdb:1.8
     ports:

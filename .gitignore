@@ -58,6 +58,13 @@ appsettings.*.Development.json
 # User secrets
 secrets.json
 
+# ==========================================
+# Dynatrace / local secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+
 # Logs
 logs/
 *.log
