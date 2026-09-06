@@ -13,7 +13,7 @@ services:
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-logo-2026-restapi}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${DT_OTLP_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_EXPORTER_OTLP_HEADERS: ${DT_OTLP_HEADERS}
+      OTEL_EXPORTER_OTLP_HEADERS: Authorization=Api-Token%20${DT_API_TOKEN}
 
   influxdb:
     image: influxdb:1.8
