@@ -103,9 +103,16 @@ jobs:
       # Marks a deployment event on the Dynatrace timeline, tied to the GitHub commit.
       # Requires an environment API token with the events.ingest scope.
       - name: Send deployment event to Dynatrace
+        env:
+          DT_DEPLOYMENT_API_TOKEN: ${{ secrets.DT_DEPLOYMENT_API_TOKEN }}
         run: |
+          if [ -z "$DT_DEPLOYMENT_API_TOKEN" ]; then
+            echo "DT_DEPLOYMENT_API_TOKEN is not configured; skipping deployment event."
+            exit 0
+          fi
+
           curl -sSf -X POST "${{ env.DT_API_URL }}/api/v2/events/ingest" \
-            -H "Authorization: Api-Token ${{ secrets.DT_DEPLOYMENT_API_TOKEN }}" \
+            -H "Authorization: Api-Token $DT_DEPLOYMENT_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{
               "eventType": "CUSTOM_DEPLOYMENT",
