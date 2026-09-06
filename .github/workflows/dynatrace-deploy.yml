@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths:
       - "RestApi/**"
+      - ".github/workflows/**"
   workflow_dispatch: {}
 
 env:
@@ -38,7 +39,7 @@ jobs:
       # Requires a Dynatrace API token (not the platform token) with the "events.ingest" scope.
       - name: Send deployment event to Dynatrace
         run: |
-          curl -sSf -X POST "${{ secrets.DT_API_URL }}/api/v2/events/ingest" \
+          curl -sSf -X POST "${{ env.DT_API_URL }}/api/v2/events/ingest" \
             -H "Authorization: Api-Token ${{ secrets.DT_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
