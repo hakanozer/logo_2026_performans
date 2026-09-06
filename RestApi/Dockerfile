@@ -1,6 +1,6 @@
-# Environment id (e.g. "ubs13257"), never bake tokens into the image.
-# Provide with: docker build --build-arg DT_ENVIRONMENT_ID=ubs13257 ...
-ARG DT_ENVIRONMENT_ID
+# Full codemodules image ref, copy exact value from Dynatrace UI -> Deploy Dynatrace -> Docker.
+# Provide with: docker build --build-arg DT_CODEMODULES_IMAGE=<env>.live.dynatrace.com/linux/oneagent-codemodules:dotnet ...
+ARG DT_CODEMODULES_IMAGE
 
 # ---- Build & publish the app ----
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
@@ -11,7 +11,7 @@ COPY . .
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # ---- Dynatrace OneAgent codemodules (requires prior `docker login` to the registry) ----
-FROM ${DT_ENVIRONMENT_ID}.apps.dynatrace.com/linux/oneagent-codemodules:dotnet AS dynatrace-codemodules
+FROM ${DT_CODEMODULES_IMAGE} AS dynatrace-codemodules
 
 # ---- Final runtime image ----
 FROM mcr.microsoft.com/dotnet/aspnet:9.0

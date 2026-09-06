@@ -4,7 +4,7 @@ services:
       context: ./RestApi
       dockerfile: Dockerfile
       args:
-        DT_ENVIRONMENT_ID: ${DT_ENVIRONMENT_ID}
+        DT_CODEMODULES_IMAGE: ${DT_CODEMODULES_IMAGE}
     ports:
       - "8080:8080"
 

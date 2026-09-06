@@ -27,11 +27,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Docker login to the Dynatrace OneAgent codemodules registry.
-      # Copy the exact command/registry hostname from:
-      # Dynatrace UI -> Deploy Dynatrace -> Set up auto-injection -> Container/Docker
+      # DT_CODEMODULES_REGISTRY / DT_CODEMODULES_USER / DT_CODEMODULES_IMAGE must be copied
+      # verbatim from Dynatrace UI -> Deploy Dynatrace -> Docker (values vary per tenant).
       - name: Log in to Dynatrace codemodules registry
         run: |
-          echo "${{ secrets.DT_PLATFORM_TOKEN }}" | docker login "${{ secrets.DT_ENVIRONMENT_ID }}.apps.dynatrace.com" -u "dynatrace" --password-stdin
+          echo "${{ secrets.DT_PLATFORM_TOKEN }}" | docker login "${{ secrets.DT_CODEMODULES_REGISTRY }}" -u "${{ secrets.DT_CODEMODULES_USER }}" --password-stdin
 
       - name: Build & push image
         uses: docker/build-push-action@v5
@@ -40,7 +40,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
-            DT_ENVIRONMENT_ID=${{ secrets.DT_ENVIRONMENT_ID }}
+            DT_CODEMODULES_IMAGE=${{ secrets.DT_CODEMODULES_IMAGE }}
 
       # Marks a deployment event on the Dynatrace timeline, tied to the GitHub commit.
       # Requires a Dynatrace API token (not the platform token) with the "events.ingest" scope.
