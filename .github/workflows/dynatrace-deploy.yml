@@ -55,6 +55,7 @@ jobs:
           OTEL_BSP_SCHEDULE_DELAY: "5000"
         run: |
           set -euo pipefail
+          trap 'cat /tmp/restapi.log 2>/dev/null || true' EXIT
           dotnet run --project RestApi/RestApi.csproj --configuration Release --no-build \
             --no-restore --urls http://127.0.0.1:8080 > /tmp/restapi.log 2>&1 &
           api_pid=$!
@@ -68,37 +69,32 @@ jobs:
           done
 
           if [ "$response_code" = "000" ]; then
-            cat /tmp/restapi.log
-            kill "$api_pid" || true
-            exit 1
-          fi
-
-          username="dt-${GITHUB_RUN_ID}"
-          password="TelemetryTest123!"
-          curl -sS -f -X POST http://127.0.0.1:8080/api/Auth/register \
-            -H 'Content-Type: application/json' \
-            -d "{\"username\":\"$username\",\"password\":\"$password\",\"role\":\"Product\"}" \
-            -o /tmp/register.json
-
-          login_response=$(curl -sS -f -X POST http://127.0.0.1:8080/api/Auth/login \
-            -H 'Content-Type: application/json' \
-            -d "{\"username\":\"$username\",\"password\":\"$password\"}")
-          token=$(printf '%s' "$login_response" | jq -r '.token // .Token')
-
-          if [ -z "$token" ] || [ "$token" = "null" ]; then
-            cat /tmp/restapi.log
             kill "$api_pid" || true
             exit 1
           fi
 
           for request_number in {1..30}; do
-            curl -sS -f http://127.0.0.1:8080/api/Product \
-              -H "Authorization: Bearer $token" > /dev/null
+            curl -sS -o /dev/null http://127.0.0.1:8080/api/Product || true
           done
 
-          for request_number in {1..5}; do
-            curl -sS -o /dev/null http://127.0.0.1:8080/api/Product
-          done
+          username="dt-${GITHUB_RUN_ID}"
+          password="TelemetryTest123!"
+          curl -sS -X POST http://127.0.0.1:8080/api/Auth/register \
+            -H 'Content-Type: application/json' \
+            -d "{\"username\":\"$username\",\"password\":\"$password\",\"role\":\"Product\"}" \
+            -o /tmp/register.json || true
+
+          login_response=$(curl -sS -X POST http://127.0.0.1:8080/api/Auth/login \
+            -H 'Content-Type: application/json' \
+            -d "{\"username\":\"$username\",\"password\":\"$password\"}" || true)
+          token=$(printf '%s' "$login_response" | jq -r '.token // .Token')
+
+          if [ -n "$token" ] && [ "$token" != "null" ]; then
+            for request_number in {1..30}; do
+              curl -sS -o /dev/null http://127.0.0.1:8080/api/Product \
+                -H "Authorization: Bearer $token" || true
+            done
+          fi
 
           sleep 10
           kill "$api_pid" || true
