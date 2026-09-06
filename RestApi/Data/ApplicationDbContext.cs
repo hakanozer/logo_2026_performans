@@ -3,7 +3,7 @@ using RestApi.Models;
 
 namespace RestApi.Data
 {
-    // data
+    // datax
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
