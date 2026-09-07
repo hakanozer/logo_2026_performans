@@ -106,7 +106,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseMiddleware<GlobalMiddleware>();
-app.UseRateLimiter();
+//app.UseRateLimiter();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
