@@ -10,6 +10,7 @@ services:
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Data Source=/app/data/restapi.db
+      InfluxDb__Url: http://influxdb:8086
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-logo-2026-restapi}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${DT_OTLP_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -28,6 +29,8 @@ services:
       - "3000:3000"
     depends_on:
       - influxdb
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin

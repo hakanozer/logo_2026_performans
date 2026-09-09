@@ -1,6 +1,3 @@
-using System.Text;
-using System.Text.Json;
-
 public class GlobalMiddleware
 {
 
@@ -12,7 +9,6 @@ public class GlobalMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        Console.WriteLine($"Request from Call");
         await _next(context);
     }
 

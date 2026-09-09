@@ -1,25 +1,23 @@
+using System.Diagnostics;
+
 public class ErrorHandlerMiddleware
 {
     private readonly RequestDelegate _next;
-    public ErrorHandlerMiddleware(RequestDelegate next)
+    private readonly ILogger<ErrorHandlerMiddleware> _logger;
+
+    public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
+
     public async Task Invoke(HttpContext context)
     {
+        var stopwatch = Stopwatch.StartNew();
         var username = context.User.Identity?.Name ?? "Anonymous";
-        Console.WriteLine($"Username {username}");
-        var ip = context.Connection.RemoteIpAddress.ToString();
-        //var sessionId = context.Session.Id;
-        var headers = context.Request.Headers;
-        //Console.WriteLine($"Session {sessionId}");
-        Console.WriteLine($"Request from {ip}");
-        Console.WriteLine($"Request Path: {context.Request.Path}");
-        Console.WriteLine($"Request Method: {context.Request.Method}");
-        foreach (var header in headers)
-        {
-            Console.WriteLine($"{header.Key}: {header.Value}");
-        }
+        var method = context.Request.Method;
+        var path = context.Request.Path.ToString();
+
         try
         {
             await _next(context);
@@ -40,7 +38,15 @@ public class ErrorHandlerMiddleware
                 status = false,
                 error = error.Message
             });
+            _logger.LogError(error, "Request {Method} {Path} by {Username} failed with {StatusCode}",
+                method, path, username, response.StatusCode);
             await response.WriteAsync(result);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _logger.LogInformation("HTTP {Method} {Path} by {Username} responded {StatusCode} in {ElapsedMilliseconds} ms",
+                method, path, username, context.Response.StatusCode, stopwatch.Elapsed.TotalMilliseconds);
         }
     }
 }

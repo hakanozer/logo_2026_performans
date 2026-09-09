@@ -7,8 +7,14 @@ using System.Threading.RateLimiting;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using RestApi.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<InfluxDbOptions>(builder.Configuration.GetSection("InfluxDb"));
+builder.Services.AddSingleton<InfluxLineProtocolWriter>();
+builder.Services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider, InfluxDbLoggerProvider>();
+builder.Services.AddHostedService<RuntimeMetricsPublisher>();
 
 var serviceName = builder.Configuration["OTEL_SERVICE_NAME"] ?? "logo-2026-restapi";
 builder.Services.AddOpenTelemetry()

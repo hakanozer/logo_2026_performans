@@ -1,0 +1,441 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "InfluxDB",
+      "description": "InfluxDB datasource created by the Grafana provisioning file (grafana/provisioning/datasources/influxdb.yaml)",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "title": "RestApi - Application Observability (InfluxDB)",
+  "uid": "restapi-app-observability",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "tags": ["restapi", "dynatrace-egitim", "influxdb"],
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Overview",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total Requests",
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 1 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Avg Response Time (ms)",
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 1 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT mean(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "P95 Response Time (ms)",
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 1 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT percentile(\"ElapsedMilliseconds\", 95) FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Failed Requests (4xx/5xx)",
+      "gridPos": { "h": 4, "w": 4, "x": 15, "y": 1 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null },
+        { "color": "red", "value": 1 }
+      ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND (\"StatusCode\" =~ /^4/ OR \"StatusCode\" =~ /^5/) AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Application Errors (Exceptions)",
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 1 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null },
+        { "color": "red", "value": 1 }
+      ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"message\") FROM \"app_logs\" WHERE \"level\" = 'Error' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "Traffic & Performance",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Requests per Interval by HTTP Method",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" } } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY time($__interval), \"Method\" fill(0)",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Response Time - Avg vs P95 (ms)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 15 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT mean(\"ElapsedMilliseconds\") AS \"avg_ms\" FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "B",
+          "rawQuery": true,
+          "query": "SELECT percentile(\"ElapsedMilliseconds\", 95) AS \"p95_ms\" FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "Breakdown",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }
+    },
+    {
+      "id": 8,
+      "type": "piechart",
+      "title": "Requests by Status Code",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "pieType": "donut" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY \"StatusCode\"",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "bargauge",
+      "title": "Requests by Endpoint",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 15 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
+      "options": { "displayMode": "gradient", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY \"Path\"",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "piechart",
+      "title": "Requests by HTTP Method",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }, "pieType": "pie" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"ElapsedMilliseconds\") FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter GROUP BY \"Method\"",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "row",
+      "title": "Errors & Logs",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Errors Over Time (by category)",
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 70, "stacking": { "mode": "normal" } } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT count(\"message\") FROM \"app_logs\" WHERE \"level\" = 'Error' AND $timeFilter GROUP BY time($__interval), \"category\" fill(0)",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Recent Error Logs",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 31 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT \"level\", \"category\", \"message\" FROM \"app_logs\" WHERE \"level\" = 'Error' AND $timeFilter ORDER BY time DESC LIMIT 50",
+          "resultFormat": "table"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Recent Requests",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 31 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT \"Method\", \"Path\", \"StatusCode\", \"ElapsedMilliseconds\", \"Username\" FROM \"app_logs\" WHERE \"category\" = 'ErrorHandlerMiddleware' AND $timeFilter ORDER BY time DESC LIMIT 50",
+          "resultFormat": "table"
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "type": "row",
+      "title": "System & Database",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 39 }
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "CPU Usage (%)",
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 40 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"CpuPercent\") FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "stat",
+      "title": "RAM - Working Set (MB)",
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 40 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "decmbytes", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"WorkingSetMb\") FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "stat",
+      "title": "GC Heap (MB)",
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 40 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "decmbytes", "decimals": 1 }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"GcHeapMb\") FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "stat",
+      "title": "DB Active Connections",
+      "gridPos": { "h": 4, "w": 4, "x": 15, "y": 40 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [
+        { "color": "green", "value": null },
+        { "color": "yellow", "value": 8 },
+        { "color": "red", "value": 15 }
+      ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"DbActiveConnections\") FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "stat",
+      "title": "Thread Count",
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 40 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"ThreadCount\") FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "timeseries",
+      "title": "CPU / RAM / GC Heap Trend",
+      "description": "CPU is %, RAM and GC Heap are MB",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 44 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10 } },
+        "overrides": [
+          { "matcher": { "id": "byFrameRefID", "options": "A" }, "properties": [{ "id": "unit", "value": "percent" }] },
+          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "decmbytes" }] },
+          { "matcher": { "id": "byFrameRefID", "options": "C" }, "properties": [{ "id": "unit", "value": "decmbytes" }] }
+        ]
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT mean(\"CpuPercent\") AS \"cpu_percent\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "B",
+          "rawQuery": true,
+          "query": "SELECT mean(\"WorkingSetMb\") AS \"ram_mb\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "C",
+          "rawQuery": true,
+          "query": "SELECT mean(\"GcHeapMb\") AS \"gc_heap_mb\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "GC Collections (cumulative since start)",
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 52 },
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 5 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "rawQuery": true,
+          "query": "SELECT last(\"Gen0Collections\") AS \"gen0\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "B",
+          "rawQuery": true,
+          "query": "SELECT last(\"Gen1Collections\") AS \"gen1\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "C",
+          "rawQuery": true,
+          "query": "SELECT last(\"Gen2Collections\") AS \"gen2\" FROM \"app_logs\" WHERE \"category\" = 'RuntimeMetrics' AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "resultFormat": "time_series"
+        }
+      ]
+    }
+  ]
+}
