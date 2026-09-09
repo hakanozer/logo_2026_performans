@@ -1,0 +1,249 @@
+{
+  "info": {
+    "_postman_id": "b298d771-6086-41f1-b571-66f854f1ad50",
+    "name": "Logo Performans",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1939021",
+    "_collection_link": "https://go.postman.co/collection/1939021-b298d771-6086-41f1-b571-66f854f1ad50?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "User Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Username\": \"kaan@mail.com\",\n    \"Password\": \"12345\",\n    \"City\": \"ankara\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User Register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Username\": \"kaan@mail.com\",\n    \"Password\": \"12345\",\n    \"Role\": \"Product\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Product List",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImthYW5AbWFpbC5jb20iLCJyb2xlIjoiUHJvZHVjdCIsIm5iZiI6MTc4ODk1MzUzNCwiZXhwIjoxNzg4OTU3MTM0LCJpYXQiOjE3ODg5NTM1MzR9.ECG96qh6NovWeGLegeDWtyBLp40IQdmLVMcDPA6DQec",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{URL}}/api/product",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "product"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Product Add",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Name\": \"iPad\",\n    \"Price\": 45000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/api/product",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "product"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Product Update",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Name\": \"TV\",\n    \"Price\": 13000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/api/product/1",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "product",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Note",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "",
+            "value": ""
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"Content\": \"Veli Toplantı Note\",\n    \"User\": {\n        \"Username\": \"veli@mail.com\",\n        \"Password\": \"12345\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/api/note/",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "note",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Note List",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImthYW5AbWFpbC5jb20iLCJyb2xlIjoiUHJvZHVjdCIsIm5iZiI6MTc4ODk1MzUzNCwiZXhwIjoxNzg4OTU3MTM0LCJpYXQiOjE3ODg5NTM1MzR9.ECG96qh6NovWeGLegeDWtyBLp40IQdmLVMcDPA6DQec",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{URL}}/api/note/",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "note",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "JWT",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImthYW5AbWFpbC5jb20iLCJyb2xlIjoiUHJvZHVjdCIsIm5iZiI6MTc4ODk0MjkyMSwiZXhwIjoxNzg4OTQ2NTIxLCJpYXQiOjE3ODg5NDI5MjF9.nwtzPsIxqzvmH43UqS9zVBOW-7S8vGaUYp4xDIrobOE"
+    },
+    {
+      "key": "URL",
+      "value": "http://localhost:5120"
+    }
+  ]
+}
