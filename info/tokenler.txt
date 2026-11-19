@@ -1,0 +1,29 @@
+dt0s16.GW3EIOLF.R7TQ7SDVUXPRYGUBXBHWKC6RS6DYIR3BN7OPF346PSU4FPQBRHSQMEDJLE7CXJRH
+
+
+DT_API_TOKEN
+curl -X POST "https://ubs13257.live.dynatrace.com/api/v2/apiTokens" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -d "{\"name\":\"github-actions-events\",\"scopes\":[\"events.ingest\"],\"expirationDate\":\"2026-10-31T20:59:59.999Z\"}" -H "Authorization: Api-Token XXXXXXXX"
+
+github-actions-events
+dt0c01.3UCSSSGDZAN3D7UYQX5ONRNP.ZKTCE2IJNPSGL2R2UWJRAOBJAAC2TD2QFO7AYHSIK3BMWJPMQ42YTJB4ENYTGB2P
+
+
+yeni token
+
+dt0s16.UALPEFBX.K25D4IWLWLX3PRHOR7OTNYNUOEHSIOI3L75QCYZUT4IIZCVGDC65BQQOQM47MVEF
+
+
+curl -X POST "https://ubs13257.live.dynatrace.com/api/v2/apiTokens" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -d "{\"name\":\"monaco-logo-2026-restapi\",\"scopes\":[\"ReadConfig\",\"WriteConfig\"],\"expirationDate\":\"2028-09-30T20:59:59.999Z\"}" -H "Authorization: Api-Token XXXXXXXX"
+
+
+curl 'https://ubs13257.live.dynatrace.com/api/v2/settings/objects' \
+-X POST \
+-H 'Accept: application/json; charset=utf-8' \
+-H 'Content-Type: application/json; charset=utf-8' \
+-H 'Authorization: Api-Token ACCESS_TOKEN' \
+-d $'[{"schemaId":"builtin:user-settings","schemaVersion":"2","scope":"user-hakanozer02@gmail.com","value":{"auto-language":true,"auto-region":true,"auto-timezone":true,"auto-theme":true}}]'
+
+
+dt0c01.M2SY5NTKPBKBKR7Q74JH6ZQE.LIYQYLFF7I7C537KDG3TWRYPIF5HCU4HS2IE3MTYR6DWYMAOKEM7RAFBVBV6GCEU
+
+

@@ -1,3 +1,4 @@
+
 services:
   restapi:
     build:
@@ -14,7 +15,7 @@ services:
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-logo-2026-restapi}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${DT_OTLP_ENDPOINT}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_EXPORTER_OTLP_HEADERS: Authorization=Api-Token%20${DT_OTEL_TOKEN}
+      OTEL_EXPORTER_OTLP_HEADERS: Authorization=Bearer%20${DT_OTEL_TOKEN}
 
   influxdb:
     image: influxdb:1.8
@@ -36,3 +37,14 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_AUTH_ANONYMOUS_ENABLED=false
+
+  chronograf:
+    image: chronograf:1.11.5
+    container_name: logo_2026_performans-chronograf
+    ports:
+      - "8888:8888"
+    depends_on:
+      - influxdb
+    volumes:
+      - ./chronograf/data:/var/lib/chronograf
+    restart: unless-stopped
