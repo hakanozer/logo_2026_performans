@@ -1,0 +1,22 @@
+{
+  "name": "logo_2026_performans",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hakanozer/logo_2026_performans.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hakanozer/logo_2026_performans/issues"
+  },
+  "homepage": "https://github.com/hakanozer/logo_2026_performans#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "02haber-playwright-audit",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "dotenv": "^16.4.7"
+  }
+}
